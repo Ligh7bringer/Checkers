@@ -78,11 +78,12 @@ public class GameWindow extends JPanel implements Runnable, MouseListener, Mouse
     }
 
     int sourceX, sourceY, destX, destY;
-    //update, called every frame
+    //update, called every "frame", TODO: FIX CLICKING DETECTION SOMEHOW!
     public void update() {
         if(clicks == 1) {
             sourceX = mouseX;
             sourceY = mouseY;
+            board.highlightTile(sourceX, sourceY);
         }
         if(clicks == 2) {
             destX = mouseX;
@@ -99,7 +100,7 @@ public class GameWindow extends JPanel implements Runnable, MouseListener, Mouse
 
         board.paint(g2d); //the board paints itself, pieces paint themselves in the board
 
-        g2d.dispose(); //what does this do?
+        g2d.dispose(); //is this needed?
     }
 
     //get mouse coords when event we are listening to occurs
@@ -133,6 +134,7 @@ public class GameWindow extends JPanel implements Runnable, MouseListener, Mouse
         System.out.println("CLICKS " + clicks);
     }
 
+    //might use these eventually
     public void mouseDragged(MouseEvent e) {}
     public void mouseMoved(MouseEvent e) {}
 

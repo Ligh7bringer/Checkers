@@ -1,9 +1,13 @@
+
 import java.awt.*;
+import java.util.ArrayList;
 
 public class Board {
-    public static final int SIZE = 8; //board width and height, i.e. number of tiles per row and column
+    private static final int SIZE = 8; //board width and height, i.e. number of tiles per row and column
     private final int TILE_WIDTH = 60; // dimensions of tiles
     private final int TILE_HEIGHT = 60;
+
+    private GridPosition highlightedTile = null;
 
     //store all the pieces here
     private Piece[][] pieces;
@@ -20,34 +24,35 @@ public class Board {
         for(int row=0; row < (SIZE); row+=2){
             pieces[5][row] = new Piece(Type.BLACK);
             pieces[7][row] = new Piece(Type.BLACK);
+            pieces[6][row+1] = new Piece(Type.BLACK);
         }
-        for(int row=1; row < (SIZE); row+=2)
-            pieces[6][row] = new Piece(Type.BLACK);
-
         for(int row=1; row < (SIZE); row+=2){
             pieces[0][row] = new Piece(Type.WHITE);
             pieces[2][row] = new Piece(Type.WHITE);
+            pieces[1][row-1] = new Piece(Type.WHITE);
         }
-        for(int row=0; row < (SIZE); row +=2)
-            pieces[1][row] = new Piece(Type.WHITE);
     }
 
     //the board has its own update
+    //parameters in order: source x, source y, destination x, destination y
     public void update(int sx, int sy, int dx, int dy) {
         //calculate position in the grid from screen coordinates
         //is this accurate enough though?
-        int col = sx / TILE_WIDTH;
-        int row = sy / TILE_HEIGHT;
-        int destCol = dx / TILE_WIDTH;
-        int destRow = dy / TILE_WIDTH;
+        int col = convertToGridCoords(sx);
+        int row = convertToGridCoords(sy);
+        int destCol = convertToGridCoords(dx);
+        int destRow = convertToGridCoords(dy);
 
         //debugging
-        System.out.println("ROW: " + row + "; COL: " + col + "; DEST ROW: " + destRow + "; DEST COL " + destCol);
+        //System.out.println("ROW: " + row + "; COL: " + col + "; DEST ROW: " + destRow + "; DEST COL " + destCol);
+        isMoveJump(row, col, destRow, destCol);
 
         if (isMoveLegal(row, col, destRow, destCol)) {
-            pieces[destRow][destCol] = pieces[row][col];
-            pieces[row][col] = null;
+            movePiece(row, col, destRow, destCol);
+        } else {
+            System.out.println("Illegal move!");
         }
+        highlightedTile = null;
     }
 
     //the board should paint itself
@@ -73,6 +78,12 @@ public class Board {
                 if(pieces[i][j] != null)
                     pieces[i][j].paint(g2d, x, y); //draw it
 
+                if(highlightedTile != null) {
+                    System.out.println(highlightedTile.getX() + ", " + highlightedTile.getY());
+                    g2d.setColor(Color.YELLOW);
+                    g2d.drawRect(highlightedTile.getX() * TILE_WIDTH, highlightedTile.getY() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+                }
+
                 //move right
                 x = x + TILE_WIDTH;
             }
@@ -83,12 +94,26 @@ public class Board {
         }
     }
 
-    public boolean isMoveLegal(int gridX, int gridY, int destX, int destY) {
-        if(pieces[gridX][gridY] != null && pieces[destX][destY] == null) { //if source has a piece and destination is an empty tile
-            Piece piece = pieces[gridX][gridY];
+    private boolean isMoveJump(int row, int col, int destRow, int destCol) {
+        if(row >= 6 || col <= 2) //make sure we dont get out of bounds exception
+            return false;
+        else if( (isTileOccupied(row, col) && getPiece(row, col).getType() == Type.WHITE) && (isTileOccupied(row+1, col-1)
+                && getPiece(row+1, col-1).getType() == Type.BLACK) && !isTileOccupied(row+2, col-2) ) {
+            movePiece(row, col, row+2, col-2);
+            removePiece(row+1, col-1);
+            return true;
+        }
+
+        return false;
+    }
+
+    //returns true if a regular move (move diagonally one tile) is legal
+    private boolean isMoveLegal(int gridX, int gridY, int destX, int destY) {
+        if(isTileOccupied(gridX, gridY) && !isTileOccupied(destX, destY)) { //if source has a piece and destination is an empty tile
+            Piece piece = getPiece(gridX, gridY);
             if(piece.getType() == Type.WHITE) {
                 //legal moves for white pieces:
-                //move dagonally to the left
+                //move diagonally to the left
                 if(destX - gridX == 1 && destY - gridY == -1) {
                     return true;
                 } else if (destX - gridX == 1 && destY - gridY == 1) { //move diagonally to the right
@@ -99,7 +124,7 @@ public class Board {
                 //move diagonally to the left
                 if(destX - gridX == -1 && destY - gridY == -1) {
                     return true;
-                } else if (destX - gridX == -1 && destY - gridY == 1) {
+                } else if (destX - gridX == -1 && destY - gridY == 1) { //move diagonally to the right
                     return true;
                 }
             }
@@ -108,4 +133,45 @@ public class Board {
         return false;
     }
 
+    //moves piece from one tile to another
+    private void movePiece(int sourceX, int sourceY, int destX, int destY) {
+        pieces[destX][destY] = pieces[sourceX][sourceY]; //move to new position
+        pieces[sourceX][sourceY] = null; //make old position null, it should be empty
+    }
+
+    //returns true if there is a piece on a given tile
+    //return false if tile is unoccupied
+    public boolean isTileOccupied(int gridX, int gridY) {
+        if(pieces[gridX][gridY] != null) {
+            System.out.println("Tile " + gridX + ", " + gridY + " is occupied");
+            return true;
+        }
+
+        System.out.println("Tile " + gridX + ", " + gridY + " is unoccupied");
+        return false;
+    }
+
+    //so we need this method to enforce jumping when possible TODO IMPLEMENT maybe find a better way?
+    private boolean canJump(int gridX, int gridY) {
+        return false;
+    }
+
+    //convert window coordinates to position in grid
+    public int convertToGridCoords(int screenCoord) {
+        return screenCoord / TILE_WIDTH; //can be divided by tile height as well because they are the same, a tile is square
+    }
+
+    //returns piece at grid coordinates gridX and gridY
+    private Piece getPiece(int gridX, int gridY) {
+        return pieces[gridX][gridY];
+    }
+
+    //remove piece at position gridX, gridY
+    private void removePiece(int gridX, int gridY) {
+        pieces[gridX][gridY] = null;
+    }
+
+    public void highlightTile(int x, int y) {
+        highlightedTile = new GridPosition(convertToGridCoords(x), convertToGridCoords(y));
+    }
 }
