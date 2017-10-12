@@ -28,7 +28,7 @@ public class Piece {
 
     //pieces should draw themselves
     public void paint(Graphics g, int x, int y) {
-        g.drawImage(image, x + 15, y + 15, null); //some magic numbers to make sure pieces are centered, TODO:change this use maths
+        g.drawImage(image, x + Board.TILE_WIDTH / 4, y + Board.TILE_HEIGHT / 4, null); //some magic numbers to make sure pieces are centered, TODO:change this use maths
     }
 
     //returns the type of the piece

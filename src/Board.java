@@ -4,13 +4,17 @@ import java.util.ArrayList;
 
 public class Board {
     private static final int SIZE = 8; //board width and height, i.e. number of tiles per row and column
-    private final int TILE_WIDTH = 60; // dimensions of tiles
-    private final int TILE_HEIGHT = 60;
+    public static final int TILE_WIDTH = 60; // dimensions of tiles
+    public static final int TILE_HEIGHT = 60;
 
-    private GridPosition highlightedTile = null;
+    //position of tile which was clicked
+    private GridPosition highlightedTile;
 
     //store all the pieces here
     private Piece[][] pieces;
+
+    //which player's turn is it
+    private boolean playerOne = true;
 
     //constructor for board
     public Board(){
@@ -43,20 +47,27 @@ public class Board {
         int destCol = convertToGridCoords(dx);
         int destRow = convertToGridCoords(dy);
 
-        //debugging
-        //System.out.println("ROW: " + row + "; COL: " + col + "; DEST ROW: " + destRow + "; DEST COL " + destCol);
-        isMoveJump(row, col, destRow, destCol);
+        //make sure the player has selected one of their pieces
+        if(validatePlayer(row, col)) {
+            //isMoveJump(row, col, destRow, destCol);
+            if (isMoveLegal(row, col, destRow, destCol)) {
+                movePiece(row, col, destRow, destCol);
+            } else {
+                System.out.println("Illegal move!");
+                switchPlayer(); //if the move is illegal, switch players as they are switched at the end of this method again
+            }
+            highlightedTile = null;
 
-        if (isMoveLegal(row, col, destRow, destCol)) {
-            movePiece(row, col, destRow, destCol);
+            switchPlayer();
         } else {
-            System.out.println("Illegal move!");
+            highlightedTile = null;
+            System.out.println("INVALID PIECE");
         }
-        highlightedTile = null;
     }
 
-    //the board should paint itself
-    public void paint(Graphics2D g2d) {
+    //the board should paintComponent itself
+    public void paintComponent(Graphics2D g2d) {
+        g2d.fillRect(0, 0, GameWindow.WIDTH, GameWindow.HEIGHT);
         //starting coordinates = top left corner of the window
         int x = 0;
         int y = 0;
@@ -79,7 +90,7 @@ public class Board {
                     pieces[i][j].paint(g2d, x, y); //draw it
 
                 if(highlightedTile != null) {
-                    System.out.println(highlightedTile.getX() + ", " + highlightedTile.getY());
+                    //System.out.println(highlightedTile.getX() + ", " + highlightedTile.getY());
                     g2d.setColor(Color.YELLOW);
                     g2d.drawRect(highlightedTile.getX() * TILE_WIDTH, highlightedTile.getY() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
                 }
@@ -94,8 +105,21 @@ public class Board {
         }
     }
 
+    //we need this to make sure a player can only move their own pieces
+    public boolean validatePlayer(int gridX, int gridY) {
+        if(getPiece(gridX, gridY) == null) {
+            return false;
+        } else if(getPiece(gridX, gridY).getType() == Type.BLACK && playerOne) {
+            return true;
+        } else if(getPiece(gridX, gridY).getType() == Type.WHITE && !playerOne) {
+            return true;
+        }
+
+        return false;
+    }
+
     private boolean isMoveJump(int row, int col, int destRow, int destCol) {
-        if(row >= 6 || col <= 2) //make sure we dont get out of bounds exception
+        if(row >= 6 || col <= 2) //make sure we don't get out of bounds exception
             return false;
         else if( (isTileOccupied(row, col) && getPiece(row, col).getType() == Type.WHITE) && (isTileOccupied(row+1, col-1)
                 && getPiece(row+1, col-1).getType() == Type.BLACK) && !isTileOccupied(row+2, col-2) ) {
@@ -156,6 +180,18 @@ public class Board {
         return false;
     }
 
+    //this will be used to indicate it's the next player's turn
+    private void switchPlayer() {
+        playerOne = !playerOne;
+    }
+
+    //return the player who is supposed to play now
+    public int getCurrentPlayer() {
+        if(playerOne)
+            return 1;
+        else
+         return 2;
+    }
     //convert window coordinates to position in grid
     public int convertToGridCoords(int screenCoord) {
         return screenCoord / TILE_WIDTH; //can be divided by tile height as well because they are the same, a tile is square

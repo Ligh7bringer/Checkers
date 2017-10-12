@@ -6,15 +6,15 @@ import javax.swing.*;
 
 public class GameWindow extends JPanel implements Runnable, MouseListener, MouseMotionListener {
     //window dimensions
-    private static final int WIDTH = 480;
-    private static final int HEIGHT = 480;
+    public static final int WIDTH = 480;
+    public static final int HEIGHT = 480;
 
     //instance of board
     private static Board board;
 
     //mouse coordinates
     private static int mouseX, mouseY;
-    private boolean isClicked = false;
+    //private boolean isClicked = false;
     private int clicks = 0;
 
     //game loop variables
@@ -26,6 +26,9 @@ public class GameWindow extends JPanel implements Runnable, MouseListener, Mouse
     //graphics
     private Graphics2D g2d;
 
+    //label?
+    private static JLabel currentPlayer;
+
     //constructor
     private GameWindow() {
         setPreferredSize(new Dimension(WIDTH, HEIGHT)); //set window width and height
@@ -33,6 +36,8 @@ public class GameWindow extends JPanel implements Runnable, MouseListener, Mouse
         //add mouse listeners
         addMouseListener(this);
         addMouseMotionListener(this);
+
+        currentPlayer = new JLabel("", SwingConstants.CENTER);
 
         board = new Board(); // initialise the board
         start(); //start main game loop
@@ -80,6 +85,8 @@ public class GameWindow extends JPanel implements Runnable, MouseListener, Mouse
     int sourceX, sourceY, destX, destY;
     //update, called every "frame", TODO: FIX CLICKING DETECTION SOMEHOW!
     public void update() {
+        currentPlayer.setText("It is player " + board.getCurrentPlayer() + "'s turn.");
+
         if(clicks == 1) {
             sourceX = mouseX;
             sourceY = mouseY;
@@ -94,11 +101,13 @@ public class GameWindow extends JPanel implements Runnable, MouseListener, Mouse
     }
 
     // this will draw everything hopefully
-    public void paint(Graphics g) {
+    public void paintComponent(Graphics g) {
         g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); //turn antialising on for nicer graphics
 
-        board.paint(g2d); //the board paints itself, pieces paint themselves in the board
+        board.paintComponent(g2d); //the board paints itself, pieces paintComponent themselves in the board
+
+
 
         g2d.dispose(); //is this needed?
     }
@@ -115,12 +124,14 @@ public class GameWindow extends JPanel implements Runnable, MouseListener, Mouse
         //set properties of the frame
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setResizable(false);
-        frame.setLayout(new BorderLayout());
-        frame.add(new GameWindow(), BorderLayout.CENTER);
+        frame.setLayout(new GridLayout(1, 2));
+        frame.add(new GameWindow());
+        frame.add(currentPlayer);
         frame.pack();
         frame.setLocationRelativeTo(null); // this should display the window in the middle of the screen ?
         frame.setVisible(true);
         frame.setBackground(Color.lightGray);
+
     }
 
     //event listeners
