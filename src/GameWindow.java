@@ -6,8 +6,8 @@ import javax.swing.*;
 
 public class GameWindow extends JPanel implements Runnable, MouseListener, MouseMotionListener {
     //window dimensions
-    public static final int WIDTH = 480;
-    public static final int HEIGHT = 480;
+    public static final int WIDTH = 481;
+    public static final int HEIGHT = Board.TILE_HEIGHT * Board.SIZE;
 
     //instance of board
     private static Board board;
@@ -26,8 +26,9 @@ public class GameWindow extends JPanel implements Runnable, MouseListener, Mouse
     //graphics
     private Graphics2D g2d;
 
-    //label?
+    //JComponents
     private static JLabel currentPlayer;
+    private static JButton button;
 
     //constructor
     private GameWindow() {
@@ -38,6 +39,9 @@ public class GameWindow extends JPanel implements Runnable, MouseListener, Mouse
         addMouseMotionListener(this);
 
         currentPlayer = new JLabel("", SwingConstants.CENTER);
+        currentPlayer.setFont(new Font("Serif", Font.PLAIN, 16));
+
+        button = new JButton("CLICK ME");
 
         board = new Board(); // initialise the board
         start(); //start main game loop
@@ -82,10 +86,11 @@ public class GameWindow extends JPanel implements Runnable, MouseListener, Mouse
         }
     }
 
-    int sourceX, sourceY, destX, destY;
-    //update, called every "frame", TODO: FIX CLICKING DETECTION SOMEHOW!
+    //some variables to track clicking
+    private int sourceX, sourceY, destX, destY;
+    //update, called every "frame", TODO: FIX CLICKING DETECTION!
     public void update() {
-        currentPlayer.setText("It is player " + board.getCurrentPlayer() + "'s turn.");
+        currentPlayer.setText("     It is player " + board.getCurrentPlayer() + "'s turn.       ");
 
         if(clicks == 1) {
             sourceX = mouseX;
@@ -107,8 +112,6 @@ public class GameWindow extends JPanel implements Runnable, MouseListener, Mouse
 
         board.paintComponent(g2d); //the board paints itself, pieces paintComponent themselves in the board
 
-
-
         g2d.dispose(); //is this needed?
     }
 
@@ -121,13 +124,34 @@ public class GameWindow extends JPanel implements Runnable, MouseListener, Mouse
     //main method
     public static void main(String[] args) {
         JFrame frame = new JFrame("Checkers"); //create frame
+        GridBagLayout gridBag = new GridBagLayout();
+        GridBagConstraints c = new GridBagConstraints();
         //set properties of the frame
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setResizable(false);
-        frame.setLayout(new GridLayout(1, 2));
+        frame.setLayout(gridBag);
+        c.fill = GridBagConstraints.HORIZONTAL;
         frame.add(new GameWindow());
+
+        c.gridx = 1;
+        c.gridy = 0;
+
+        c.weighty = 1;
+        c.weightx = 0;
+        c.anchor = GridBagConstraints.CENTER;
+        c.insets = new Insets(5, 5, 5, 5);
+        gridBag.setConstraints(button, c);
         frame.add(currentPlayer);
+
+        c.weighty = 1;
+        c.weightx = 0;
+        c.anchor = GridBagConstraints.NORTH;
+        c.insets = new Insets(150, 5, 5, 5);
+        gridBag.setConstraints(button, c);
+        frame.add(button);
+
         frame.pack();
+
         frame.setLocationRelativeTo(null); // this should display the window in the middle of the screen ?
         frame.setVisible(true);
         frame.setBackground(Color.lightGray);

@@ -1,9 +1,7 @@
-
 import java.awt.*;
-import java.util.ArrayList;
 
 public class Board {
-    private static final int SIZE = 8; //board width and height, i.e. number of tiles per row and column
+    public static final int SIZE = 8; //board width and height, i.e. number of tiles per row and column
     public static final int TILE_WIDTH = 60; // dimensions of tiles
     public static final int TILE_HEIGHT = 60;
 
@@ -16,10 +14,14 @@ public class Board {
     //which player's turn is it
     private boolean playerOne = true;
 
+    //
+    private MoveController moveController;
+
     //constructor for board
     public Board(){
         pieces = new Piece[SIZE][SIZE]; //create the array
         initialiseBoard(); //call initialise to add pieces to the array
+        moveController = new MoveController(this);
     }
 
     //this creates the starting layout of the board
@@ -38,7 +40,7 @@ public class Board {
     }
 
     //the board has its own update
-    //parameters in order: source x, source y, destination x, destination y
+    //parameters: source x, source y, destination x, destination y
     public void update(int sx, int sy, int dx, int dy) {
         //calculate position in the grid from screen coordinates
         //is this accurate enough though?
@@ -49,16 +51,19 @@ public class Board {
 
         //make sure the player has selected one of their pieces
         if(validatePlayer(row, col)) {
-            //isMoveJump(row, col, destRow, destCol);
-            if (isMoveLegal(row, col, destRow, destCol)) {
+            if(moveController.isMoveJump(row, col, destRow, destCol)) {
                 movePiece(row, col, destRow, destCol);
+                switchPlayer();
+            } else if (moveController.isMoveLegal(row, col, destRow, destCol)) {
+                movePiece(row, col, destRow, destCol);
+                switchPlayer();
             } else {
                 System.out.println("Illegal move!");
-                switchPlayer(); //if the move is illegal, switch players as they are switched at the end of this method again
+                //switchPlayer(); //if the move is illegal, switch players as they are switched at the end of this method again
             }
             highlightedTile = null;
 
-            switchPlayer();
+            //switchPlayer();
         } else {
             highlightedTile = null;
             System.out.println("INVALID PIECE");
@@ -67,7 +72,6 @@ public class Board {
 
     //the board should paintComponent itself
     public void paintComponent(Graphics2D g2d) {
-        g2d.fillRect(0, 0, GameWindow.WIDTH, GameWindow.HEIGHT);
         //starting coordinates = top left corner of the window
         int x = 0;
         int y = 0;
@@ -118,47 +122,8 @@ public class Board {
         return false;
     }
 
-    private boolean isMoveJump(int row, int col, int destRow, int destCol) {
-        if(row >= 6 || col <= 2) //make sure we don't get out of bounds exception
-            return false;
-        else if( (isTileOccupied(row, col) && getPiece(row, col).getType() == Type.WHITE) && (isTileOccupied(row+1, col-1)
-                && getPiece(row+1, col-1).getType() == Type.BLACK) && !isTileOccupied(row+2, col-2) ) {
-            movePiece(row, col, row+2, col-2);
-            removePiece(row+1, col-1);
-            return true;
-        }
-
-        return false;
-    }
-
-    //returns true if a regular move (move diagonally one tile) is legal
-    private boolean isMoveLegal(int gridX, int gridY, int destX, int destY) {
-        if(isTileOccupied(gridX, gridY) && !isTileOccupied(destX, destY)) { //if source has a piece and destination is an empty tile
-            Piece piece = getPiece(gridX, gridY);
-            if(piece.getType() == Type.WHITE) {
-                //legal moves for white pieces:
-                //move diagonally to the left
-                if(destX - gridX == 1 && destY - gridY == -1) {
-                    return true;
-                } else if (destX - gridX == 1 && destY - gridY == 1) { //move diagonally to the right
-                    return true;
-                }
-            } else if (piece.getType() == Type.BLACK) {
-                //legal moves for black, in the opposite direction:
-                //move diagonally to the left
-                if(destX - gridX == -1 && destY - gridY == -1) {
-                    return true;
-                } else if (destX - gridX == -1 && destY - gridY == 1) { //move diagonally to the right
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     //moves piece from one tile to another
-    private void movePiece(int sourceX, int sourceY, int destX, int destY) {
+    public void movePiece(int sourceX, int sourceY, int destX, int destY) {
         pieces[destX][destY] = pieces[sourceX][sourceY]; //move to new position
         pieces[sourceX][sourceY] = null; //make old position null, it should be empty
     }
@@ -172,11 +137,6 @@ public class Board {
         }
 
         System.out.println("Tile " + gridX + ", " + gridY + " is unoccupied");
-        return false;
-    }
-
-    //so we need this method to enforce jumping when possible TODO IMPLEMENT maybe find a better way?
-    private boolean canJump(int gridX, int gridY) {
         return false;
     }
 
@@ -198,12 +158,12 @@ public class Board {
     }
 
     //returns piece at grid coordinates gridX and gridY
-    private Piece getPiece(int gridX, int gridY) {
+    public Piece getPiece(int gridX, int gridY) {
         return pieces[gridX][gridY];
     }
 
     //remove piece at position gridX, gridY
-    private void removePiece(int gridX, int gridY) {
+    public void removePiece(int gridX, int gridY) {
         pieces[gridX][gridY] = null;
     }
 
