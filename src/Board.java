@@ -28,14 +28,14 @@ public class Board {
     //is there a more efficient way to do this?
     private void initialiseBoard() {
         for(int row=0; row < (SIZE); row+=2){
-            pieces[5][row] = new Piece(Type.BLACK);
-            pieces[7][row] = new Piece(Type.BLACK);
-            pieces[6][row+1] = new Piece(Type.BLACK);
+            pieces[5][row] = new Piece(Type.BLACK, new GridPosition(5, row));
+            pieces[7][row] = new Piece(Type.BLACK, new GridPosition(7, row));
+            pieces[6][row+1] = new Piece(Type.BLACK, new GridPosition(6, row+1));
         }
         for(int row=1; row < (SIZE); row+=2){
-            pieces[0][row] = new Piece(Type.WHITE);
-            pieces[2][row] = new Piece(Type.WHITE);
-            pieces[1][row-1] = new Piece(Type.WHITE);
+            pieces[0][row] = new Piece(Type.WHITE, new GridPosition(0, row));
+            pieces[2][row] = new Piece(Type.WHITE, new GridPosition(2, row));
+            pieces[1][row-1] = new Piece(Type.WHITE, new GridPosition(5, row-1));
         }
     }
 
@@ -49,7 +49,10 @@ public class Board {
         int destCol = convertToGridCoords(dx);
         int destRow = convertToGridCoords(dy);
 
-        //make sure the player has selected one of their pieces
+        for (GridPosition gp : moveController.getPossibleJumps(row, col)) {
+            System.out.println(gp.toString());
+        }
+
         if(validatePlayer(row, col)) {
             if(moveController.isMoveJump(row, col, destRow, destCol)) {
                 movePiece(row, col, destRow, destCol);
@@ -90,8 +93,8 @@ public class Board {
                 g2d.fillRect(x, y, TILE_WIDTH, TILE_HEIGHT);
 
                 //if there's a piece on that tile
-                if(pieces[i][j] != null)
-                    pieces[i][j].paint(g2d, x, y); //draw it
+                if(getPiece(i, j) != null)
+                    getPiece(i, j).paintComponent(g2d, x, y); //draw it
 
                 if(highlightedTile != null) {
                     //System.out.println(highlightedTile.getX() + ", " + highlightedTile.getY());
@@ -160,6 +163,18 @@ public class Board {
     //returns piece at grid coordinates gridX and gridY
     public Piece getPiece(int gridX, int gridY) {
         return pieces[gridX][gridY];
+    }
+
+    //returns the whole array of pieces
+    public Piece[][] getPieces() {
+        return pieces;
+    }
+
+    public Type getCurrentColour() {
+        if(playerOne)
+            return Type.BLACK;
+        else
+            return Type.WHITE;
     }
 
     //remove piece at position gridX, gridY

@@ -14,4 +14,9 @@ public class GridPosition {
     public int getY() {
         return y;
     }
+
+    @Override
+    public String toString() {
+        return this.getX() + ", " + getY();
+    }
 }

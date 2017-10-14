@@ -90,7 +90,7 @@ public class GameWindow extends JPanel implements Runnable, MouseListener, Mouse
     private int sourceX, sourceY, destX, destY;
     //update, called every "frame", TODO: FIX CLICKING DETECTION!
     public void update() {
-        currentPlayer.setText("     It is player " + board.getCurrentPlayer() + "'s turn.       ");
+        currentPlayer.setText("     It's Player " + board.getCurrentPlayer() + "'s turn.       ");
 
         if(clicks == 1) {
             sourceX = mouseX;

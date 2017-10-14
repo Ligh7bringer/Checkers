@@ -1,3 +1,6 @@
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 public class MoveController {
 
     private Board board;
@@ -46,6 +49,48 @@ public class MoveController {
         }
 
         return false;
+    }
+
+    //this should be a separate method because we don't want to have one huge method that does everything
+    //TODO can this be done in a different way without so many if...else statements?
+    public ArrayList<GridPosition> getPossibleJumps(int row, int col) {
+        ArrayList<GridPosition> jumps = new ArrayList<>();
+        try {
+            if (board.getPiece(row, col).getType() == Type.WHITE) {
+                if (board.isTileOccupied(row, col) && (board.isTileOccupied(row + 1, col - 1)
+                        && board.getPiece(row + 1, col - 1).getType() == Type.BLACK) && !board.isTileOccupied(row + 2, col - 2)) {
+                    jumps.add(new GridPosition(row + 2, col - 2));
+                } else if (board.isTileOccupied(row, col) && (board.isTileOccupied(row + 1, col + 1)
+                        && board.getPiece(row + 1, col + 1).getType() == Type.BLACK) && !board.isTileOccupied(row + 2, col + 2)) {
+                    jumps.add(new GridPosition(row + 2, col + 2));
+                }
+            } else {
+                if (board.isTileOccupied(row, col) && (board.isTileOccupied(row - 1, col - 1) && board.getPiece(row - 1, col - 1).getType() == Type.WHITE)
+                        && !board.isTileOccupied(row - 2, col - 2)) {
+                    jumps.add(new GridPosition(row - 2, col - 2));
+                } else if(board.isTileOccupied(row, col) && (board.isTileOccupied(row - 1, col + 1) && board.getPiece(row - 1, col + 1).getType() == Type.WHITE)
+                        && !board.isTileOccupied(row-2, col+2)) {
+                    jumps.add(new GridPosition(row-2, col+2));
+                }
+            }
+
+        } catch(ArrayIndexOutOfBoundsException e) {
+            System.out.println("FUCK SAKE!!");
+        }
+
+        return jumps;
+    }
+
+    //a player has to jump if they can so this will be needed later
+    //TODO change this so it actually returns all pieces which can jump
+    public void hasToJump() {
+        for(Piece[] row : board.getPieces()) {
+            for(Piece p : row) {
+                if(p != null && p.getType() == board.getCurrentColour()) {
+                    System.out.println(p.getType());
+                }
+            }
+        }
     }
 
     //so we need this method to enforce jumping when possible TODO IMPLEMENT maybe find a better way?

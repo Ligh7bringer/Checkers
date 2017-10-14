@@ -11,7 +11,7 @@ public class Piece {
     private GridPosition gridPosition; //is this needed?
 
     //constructor, takes the type of the piece
-    public Piece(Type t) {
+    public Piece(Type t, GridPosition gp) {
         this.type = t; //set the type
         //load the appropriate image
         if(this.getType() == Type.BLACK)
@@ -26,10 +26,12 @@ public class Piece {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            this.gridPosition = gp;
     }
 
     //pieces should draw themselves
-    public void paint(Graphics g, int x, int y) {
+    public void paintComponent(Graphics g, int x, int y) {
         g.drawImage(image, x + Board.TILE_WIDTH / 4, y + Board.TILE_HEIGHT / 4, null); //TODO:change this to calculate center of tile
     }
 
@@ -44,5 +46,9 @@ public class Piece {
     //returns the type of the piece
     public Type getType() {
         return type;
+    }
+
+    public GridPosition getGridPosition() {
+        return gridPosition;
     }
 }
