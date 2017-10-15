@@ -1,3 +1,5 @@
+package Model;
+
 public class GridPosition {
     private int x;
     private int y;

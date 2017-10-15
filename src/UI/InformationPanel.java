@@ -1,3 +1,9 @@
+package UI;
+
+import Controller.GameHistory;
+import Model.Board;
+import Model.GridPosition;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -20,8 +26,6 @@ public class InformationPanel extends JPanel {
         info = new JLabel("Moves:");
         textArea = new JTextArea();
         textArea.setEditable(false);
-        //textArea.setSize(20, 20);
-        //textArea.setMaximumSize(new Dimension(20, 20));
         textArea.setText("");
 
         scroll = new JScrollPane (textArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);

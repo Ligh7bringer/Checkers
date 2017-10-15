@@ -1,3 +1,10 @@
+package Controller;
+
+import Model.Board;
+import Model.GridPosition;
+import Model.Piece;
+import Model.Type;
+
 import java.util.ArrayList;
 
 public class MoveController {

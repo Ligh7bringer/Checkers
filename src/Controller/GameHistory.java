@@ -1,3 +1,7 @@
+package Controller;
+
+import Model.GridPosition;
+
 import java.util.LinkedList;
 
 public class GameHistory {

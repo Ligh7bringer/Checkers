@@ -1,9 +1,17 @@
+package Model;
+
+import Controller.GameHistory;
+import Controller.MoveController;
+import Model.GridPosition;
+import Model.Piece;
+import Model.Type;
+
 import java.awt.*;
 
 public class Board {
     public static final int SIZE = 8; //board width and height, i.e. number of tiles per row and column
-    public static final int TILE_WIDTH = 60; // dimensions of tiles
-    public static final int TILE_HEIGHT = 60;
+    public static final int TILE_WIDTH = 80; // dimensions of tiles
+    public static final int TILE_HEIGHT = 80;
 
     //position of tile which was clicked
     private GridPosition highlightedTile;

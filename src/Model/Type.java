@@ -1,3 +1,5 @@
+package Model;
+
 //enum so we know what kind of pieces we have
 public enum Type {
         WHITE,

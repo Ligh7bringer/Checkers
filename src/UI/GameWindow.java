@@ -1,20 +1,14 @@
+package UI;
+
+import Model.Board;
+
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import javax.swing.*;
 
-public class GameWindow extends JPanel implements Runnable, MouseListener{
+public class GameWindow extends JPanel implements Runnable{
     //window dimensions
     public static final int WIDTH = Board.TILE_WIDTH * Board.SIZE + 1;
     public static final int HEIGHT = Board.TILE_HEIGHT * Board.SIZE;
-
-    //instance of board
-    private static Board board;
-
-    //mouse coordinates
-    private static int mouseX, mouseY;
-    //private boolean isClicked = false;
-    private int clicks = 0;
 
     //game loop variables
     private Thread thread;
@@ -31,26 +25,17 @@ public class GameWindow extends JPanel implements Runnable, MouseListener{
     private static JButton saveButton;
 
     private static InformationPanel informationPanel;
+    private static GamePanel gamePanel;
 
     //constructor
     private GameWindow() {
         setPreferredSize(new Dimension(WIDTH, HEIGHT)); //set window width and height
         setFocusable(true); // this should help with mouse events?
-        //add mouse listeners
-        addMouseListener(this);
-        //addMouseMotionListener(this);
-
-        /*currentPlayer = new JLabel("", SwingConstants.CENTER);
-        currentPlayer.setFont(new Font("Serif", Font.PLAIN, 16));
-
-        textArea = new JTextArea(20, 15);
-        textArea.setEditable(false);*/
 
         saveButton = new JButton("Save game");
 
         informationPanel = new InformationPanel();
-
-        board = new Board(); // initialise the board
+        gamePanel = new GamePanel();
         start(); //start main game loop
     }
 
@@ -93,57 +78,39 @@ public class GameWindow extends JPanel implements Runnable, MouseListener{
         }
     }
 
-    //some variables to track clicking
-    private int sourceX, sourceY, destX, destY;
-    //update, called every "frame", TODO: FIX CLICKING DETECTION!
+    //update, called every "frame"
     public void update() {
+        gamePanel.update();
         informationPanel.update();
-
-        if(clicks == 1) {
-            sourceX = mouseX;
-            sourceY = mouseY;
-            board.highlightTile(sourceX, sourceY);
-        }
-        if(clicks == 2) {
-            destX = mouseX;
-            destY = mouseY;
-            board.update(sourceX, sourceY, destX, destY);
-            clicks = 0;
-        }
     }
-
-
 
     // this will draw everything hopefully
     public void paintComponent(Graphics g) {
         g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); //turn antialising on for nicer graphics
 
-        board.paintComponent(g2d); //the board paints itself, pieces paintComponent themselves in the board
+        gamePanel.paintComponent(g);
 
         g2d.dispose(); //is this needed?
     }
 
-    //get mouse coords when event we are listening to occurs
-    private void setMousePosition(MouseEvent e) {
-        mouseX = e.getX();
-        mouseY = e.getY();
-    }
+
 
     //main method
     public static void main(String[] args) {
+        GameWindow gw = new GameWindow(); //create an object so the constructor is called? is this bad?
         JFrame frame = new JFrame("Checkers"); //create frame
-        GridBagLayout gridBag = new GridBagLayout();
-        GridBagConstraints c = new GridBagConstraints();
         //set properties of the frame
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setResizable(false);
+
+        //layout
+        GridBagLayout gridBag = new GridBagLayout();
+        GridBagConstraints c = new GridBagConstraints();
         frame.setLayout(gridBag);
-        Container container = frame.getContentPane();
-        GameWindow gm = new GameWindow();
         c.fill = GridBagConstraints.HORIZONTAL;
 
-        c.gridx = 0;
+       /* c.gridx = 0;
         c.gridy = 0;
         c.weighty = 1;
         c.weightx = 0.1;
@@ -157,12 +124,18 @@ public class GameWindow extends JPanel implements Runnable, MouseListener{
         c.anchor = GridBagConstraints.CENTER;
         c.weighty = 0.5;
         gridBag.setConstraints(gm, c);
-        frame.add(gm);
+        frame.add(gm); */
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.insets = new Insets(3,3,3,3);
+        gridBag.setConstraints(gamePanel, c);
+        frame.add(gamePanel);
 
         c.gridx = 1;
-        c.gridy = 1;
+        c.gridy = 0;
         c.weightx = 1;
-        c.anchor = GridBagConstraints.NORTH;
+        //c.anchor = GridBagConstraints.NORTH;
         gridBag.setConstraints(informationPanel, c);
         frame.add(informationPanel);
 
@@ -173,20 +146,5 @@ public class GameWindow extends JPanel implements Runnable, MouseListener{
         frame.getContentPane().setBackground(Color.WHITE); //this doesn't seem to change the background colour?
     }
 
-    //event listeners
-    public void mouseClicked(MouseEvent e) {
-        setMousePosition(e);
-        clicks++;
 
-        if(clicks > 2)
-            clicks = 0;
-
-        System.out.println("CLICKS " + clicks);
-    }
-
-    //need these although I am not going to use them
-    public void mousePressed(MouseEvent e) { }
-    public void mouseReleased(MouseEvent e) { }
-    public void mouseEntered(MouseEvent e) { }
-    public void mouseExited(MouseEvent e) { }
 }
