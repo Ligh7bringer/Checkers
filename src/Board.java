@@ -12,9 +12,9 @@ public class Board {
     private Piece[][] pieces;
 
     //which player's turn is it
-    private boolean playerOne = true;
+    private static boolean playerOne = true;
 
-    //
+    //instance of move controller
     private MoveController moveController;
 
     //constructor for board
@@ -49,20 +49,17 @@ public class Board {
         int destCol = convertToGridCoords(dx);
         int destRow = convertToGridCoords(dy);
 
-        for (GridPosition gp : moveController.getPossibleJumps(row, col)) {
-            System.out.println(gp.toString());
-        }
-
         if(validatePlayer(row, col)) {
             if(moveController.isMoveJump(row, col, destRow, destCol)) {
                 movePiece(row, col, destRow, destCol);
+                GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol)); //TODO fix this so it gets the right destination coordinates
                 switchPlayer();
             } else if (moveController.isMoveLegal(row, col, destRow, destCol)) {
                 movePiece(row, col, destRow, destCol);
+                GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol));
                 switchPlayer();
             } else {
                 System.out.println("Illegal move!");
-                //switchPlayer(); //if the move is illegal, switch players as they are switched at the end of this method again
             }
             highlightedTile = null;
 
@@ -135,11 +132,11 @@ public class Board {
     //return false if tile is unoccupied
     public boolean isTileOccupied(int gridX, int gridY) {
         if(pieces[gridX][gridY] != null) {
-            System.out.println("Tile " + gridX + ", " + gridY + " is occupied");
+            //System.out.println("Tile " + gridX + ", " + gridY + " is occupied");
             return true;
         }
 
-        System.out.println("Tile " + gridX + ", " + gridY + " is unoccupied");
+        //System.out.println("Tile " + gridX + ", " + gridY + " is unoccupied");
         return false;
     }
 
@@ -149,7 +146,7 @@ public class Board {
     }
 
     //return the player who is supposed to play now
-    public int getCurrentPlayer() {
+    public static int getCurrentPlayer() {
         if(playerOne)
             return 1;
         else

@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class MoveController {
@@ -60,7 +59,8 @@ public class MoveController {
                 if (board.isTileOccupied(row, col) && (board.isTileOccupied(row + 1, col - 1)
                         && board.getPiece(row + 1, col - 1).getType() == Type.BLACK) && !board.isTileOccupied(row + 2, col - 2)) {
                     jumps.add(new GridPosition(row + 2, col - 2));
-                } else if (board.isTileOccupied(row, col) && (board.isTileOccupied(row + 1, col + 1)
+                }
+                if (board.isTileOccupied(row, col) && (board.isTileOccupied(row + 1, col + 1)
                         && board.getPiece(row + 1, col + 1).getType() == Type.BLACK) && !board.isTileOccupied(row + 2, col + 2)) {
                     jumps.add(new GridPosition(row + 2, col + 2));
                 }
@@ -68,7 +68,8 @@ public class MoveController {
                 if (board.isTileOccupied(row, col) && (board.isTileOccupied(row - 1, col - 1) && board.getPiece(row - 1, col - 1).getType() == Type.WHITE)
                         && !board.isTileOccupied(row - 2, col - 2)) {
                     jumps.add(new GridPosition(row - 2, col - 2));
-                } else if(board.isTileOccupied(row, col) && (board.isTileOccupied(row - 1, col + 1) && board.getPiece(row - 1, col + 1).getType() == Type.WHITE)
+                }
+                if(board.isTileOccupied(row, col) && (board.isTileOccupied(row - 1, col + 1) && board.getPiece(row - 1, col + 1).getType() == Type.WHITE)
                         && !board.isTileOccupied(row-2, col+2)) {
                     jumps.add(new GridPosition(row-2, col+2));
                 }

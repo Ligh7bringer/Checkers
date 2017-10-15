@@ -32,7 +32,7 @@ public class Piece {
 
     //pieces should draw themselves
     public void paintComponent(Graphics g, int x, int y) {
-        g.drawImage(image, x + Board.TILE_WIDTH / 4, y + Board.TILE_HEIGHT / 4, null); //TODO:change this to calculate center of tile
+        g.drawImage(image, x +image.getWidth() / 2, y + image.getHeight() / 2, null); //TODO:change this to calculate center of tile
     }
 
     //this method will change the piece type to black or white king
