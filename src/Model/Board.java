@@ -2,11 +2,10 @@ package Model;
 
 import Controller.GameHistory;
 import Controller.MoveController;
-import Model.GridPosition;
-import Model.Piece;
-import Model.Type;
 
 import java.awt.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 public class Board {
     public static final int SIZE = 8; //board width and height, i.e. number of tiles per row and column
@@ -15,6 +14,9 @@ public class Board {
 
     //position of tile which was clicked
     private GridPosition highlightedTile;
+    private ArrayList<GridPosition> availableTiles;
+
+    private int sourceX, sourceY, destX, destY;
 
     //store all the pieces here
     private Piece[][] pieces;
@@ -49,13 +51,13 @@ public class Board {
 
     //the board has its own update
     //parameters: source x, source y, destination x, destination y
-    public void update(int sx, int sy, int dx, int dy) {
+    public void update(int row, int col, int destRow, int destCol) {
         //calculate position in the grid from screen coordinates
         //is this accurate enough though?
-        int col = convertToGridCoords(sx);
-        int row = convertToGridCoords(sy);
-        int destCol = convertToGridCoords(dx);
-        int destRow = convertToGridCoords(dy);
+        //int col = convertToGridCoords(sx);
+        //int row = convertToGridCoords(sy);
+        //int destCol = convertToGridCoords(dx);
+        //int destRow = convertToGridCoords(dy);
 
         if(validatePlayer(row, col)) {
             if(moveController.isMoveJump(row, col, destRow, destCol)) {
@@ -69,13 +71,15 @@ public class Board {
             } else {
                 System.out.println("Illegal move!");
             }
-            highlightedTile = null;
+            //highlightedTile = null;
 
             //switchPlayer();
         } else {
-            highlightedTile = null;
+            //highlightedTile = null;
             System.out.println("INVALID PIECE");
         }
+        availableTiles.clear();
+        highlightedTile = null;
     }
 
     //the board should paintComponent itself
@@ -101,12 +105,6 @@ public class Board {
                 if(getPiece(i, j) != null)
                     getPiece(i, j).paintComponent(g2d, x, y); //draw it
 
-                if(highlightedTile != null) {
-                    //System.out.println(highlightedTile.getX() + ", " + highlightedTile.getY());
-                    g2d.setColor(Color.YELLOW);
-                    g2d.drawRect(highlightedTile.getX() * TILE_WIDTH, highlightedTile.getY() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
-                }
-
                 //move right
                 x = x + TILE_WIDTH;
             }
@@ -115,11 +113,25 @@ public class Board {
             //move down, next row
             y += TILE_HEIGHT;
         }
+
+        if(highlightedTile != null) {
+            g2d.setColor(Color.YELLOW);
+            g2d.drawRect(highlightedTile.getX() * TILE_WIDTH, highlightedTile.getY() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+        }
+
+        if(availableTiles != null) {
+            g2d.setColor(new Color(0, 255, 0, 100));
+            for(int i = 0; i < availableTiles.size(); i++) {
+                g2d.fillRect(availableTiles.get(i).getY() * TILE_WIDTH, availableTiles.get(i).getX() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            }
+        }
+
     }
 
     //we need this to make sure a player can only move their own pieces
     public boolean validatePlayer(int gridX, int gridY) {
         if(getPiece(gridX, gridY) == null) {
+            System.out.println("empty tile at" + sourceX + ", " + sourceY);
             return false;
         } else if(getPiece(gridX, gridY).getType() == Type.BLACK && playerOne) {
             return true;
@@ -175,11 +187,11 @@ public class Board {
         return pieces;
     }
 
-    public Type getCurrentColour() {
+    public static Type getCurrentColour() {
         if(playerOne)
-            return Type.BLACK;
-        else
             return Type.WHITE;
+        else
+            return Type.BLACK;
     }
 
     //remove piece at position gridX, gridY
@@ -187,7 +199,24 @@ public class Board {
         pieces[gridX][gridY] = null;
     }
 
-    public void highlightTile(int x, int y) {
-        highlightedTile = new GridPosition(convertToGridCoords(x), convertToGridCoords(y));
+    private void highlightTile(int x, int y) {
+        highlightedTile = new GridPosition(x, y);
+    }
+
+    public void addSource(int x, int y) {
+       availableTiles = new ArrayList<>();
+       sourceX = convertToGridCoords(x);
+       sourceY = convertToGridCoords(y);
+       highlightTile(sourceX, sourceY);
+
+       if(validatePlayer(sourceY, sourceX))
+           availableTiles = moveController.getPossibleMoves(sourceY, sourceX);
+    }
+
+    public void addDestination(int x, int y) {
+        destX = convertToGridCoords(y);
+        destY = convertToGridCoords(x);
+        System.out.println("Source: " + sourceX + ", " + sourceY + " Destination: " + destX + ", " + destY);
+        update(sourceY, sourceX, destX, destY);
     }
 }

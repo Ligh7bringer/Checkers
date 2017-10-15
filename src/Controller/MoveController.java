@@ -5,6 +5,7 @@ import Model.GridPosition;
 import Model.Piece;
 import Model.Type;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class MoveController {
@@ -16,7 +17,7 @@ public class MoveController {
     }
 
     //returns true if a regular move (move diagonally one tile) is legal
-    public boolean isMoveLegal(int gridX, int gridY, int destX, int destY) {
+      public boolean isMoveLegal(int gridX, int gridY, int destX, int destY) {
         if(board.isTileOccupied(gridX, gridY) && !board.isTileOccupied(destX, destY)) { //if source has a piece and destination is an empty tile
             Piece piece = board.getPiece(gridX, gridY);
             if(piece.getType() == Type.WHITE) {
@@ -87,6 +88,35 @@ public class MoveController {
         }
 
         return jumps;
+    }
+
+    //
+    public ArrayList<GridPosition> getPossibleMoves(int gridX, int gridY) {
+        ArrayList<GridPosition> moves = new ArrayList<>();
+        if(board.isTileOccupied(gridX, gridY)) { //if source has a piece
+            Piece piece = board.getPiece(gridX, gridY);
+            if(piece.getType() == Type.WHITE) {
+                //legal moves for white pieces:
+                //move diagonally to the left
+                if(board.getPiece(gridX+1, gridY-1) == null) {
+                    moves.add(new GridPosition(gridX+1, gridY-1));
+                }
+                if (board.getPiece(gridX+1, gridY+1) == null) { //move diagonally to the right
+                    moves.add(new GridPosition(gridX+1, gridY+1));
+                }
+            } else if (piece.getType() == Type.BLACK) {
+                //legal moves for black, in the opposite direction:
+                //move diagonally to the left
+                if(board.getPiece(gridX-1, gridY-1) == null){
+                    moves.add(new GridPosition(gridX-1, gridY-1));
+                }
+                if (board.getPiece(gridX-1, gridY+1) == null) { //move diagonally to the right
+                    moves.add(new GridPosition(gridX-1, gridY+1));
+                }
+            }
+        }
+
+        return moves;
     }
 
     //a player has to jump if they can so this will be needed later

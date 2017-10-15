@@ -66,7 +66,7 @@ public class InformationPanel extends JPanel {
         GridPosition[] gps;
         gps = GameHistory.getMoves().removeFirst();
 
-        text +=gps[0].toString() + " -> ";
+        text += Board.getCurrentColour() + ": " + gps[0].toString() + " -> ";
         text += gps[1].toString() + "\n";
 
         textArea.append(text);

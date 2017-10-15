@@ -3,10 +3,8 @@ package UI;
 import Model.Board;
 
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -41,14 +39,14 @@ public class GamePanel extends JPanel implements MouseListener {
     private int sourceX, sourceY, destX, destY;
     public void update() {
         if(clicks == 1) {
-            sourceX = mouseX;
-            sourceY = mouseY;
-            board.highlightTile(sourceX, sourceY);
+           // sourceX = mouseX;
+            //sourceY = mouseY;
+            board.addSource(mouseX, mouseY);
         }
         if(clicks == 2) {
-            destX = mouseX;
-            destY = mouseY;
-            board.update(sourceX, sourceY, destX, destY);
+            //destX = mouseX;
+            //destY = mouseY;
+            board.addDestination(mouseX, mouseY);
             clicks = 0;
         }
 
@@ -67,7 +65,7 @@ public class GamePanel extends JPanel implements MouseListener {
         mouseY = e.getY();
     }
 
-    //event listeners. Mouse pressed seems to be more accurate than mouse clicked for some reason
+    //event listeners. Mouse pressed seems to be more accurate than mouseClicked for some reason
     public void mousePressed(MouseEvent e) {
         setMousePosition(e);
         clicks++;
