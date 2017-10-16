@@ -78,7 +78,7 @@ public class GameWindow extends JPanel implements Runnable{
         }
     }
 
-    //update, called every "frame"
+    //validateMove, called every "frame"
     public void update() {
         gamePanel.update();
         informationPanel.update();
@@ -88,6 +88,7 @@ public class GameWindow extends JPanel implements Runnable{
     public void paintComponent(Graphics g) {
         g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); //turn antialising on for nicer graphics
+        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
         gamePanel.paintComponent(g);
 

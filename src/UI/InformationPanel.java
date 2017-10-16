@@ -10,7 +10,7 @@ import java.awt.*;
 public class InformationPanel extends JPanel {
     private JLabel currentPlayer;
     private JLabel info;
-    private JTextArea textArea;
+    private JTextPane textPane;
     private JScrollPane scroll;
 
     public InformationPanel() {
@@ -24,13 +24,14 @@ public class InformationPanel extends JPanel {
 
         currentPlayer = new JLabel("Player 1");
         info = new JLabel("Moves:");
-        textArea = new JTextArea();
-        textArea.setEditable(false);
-        textArea.setText("");
+        textPane = new JTextPane();
+        textPane.setEditable(false);
+        textPane.setText("");
 
-        scroll = new JScrollPane (textArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll = new JScrollPane (textPane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         //scroll.setMaximumSize(new Dimension(50, 10));
-        scroll.setPreferredSize(new Dimension(150, 100));
+        scroll.setPreferredSize(new Dimension(150, 200));
+
 
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -66,10 +67,15 @@ public class InformationPanel extends JPanel {
         GridPosition[] gps;
         gps = GameHistory.getMoves().removeFirst();
 
-        text += Board.getCurrentColour() + ": " + gps[0].toString() + " -> ";
+        if(Board.getCurrentPlayer() == 2)
+            text += "Black: ";
+        else
+            text += "White: ";
+
+        text+= gps[0].toString() + " -> ";
         text += gps[1].toString() + "\n";
 
-        textArea.append(text);
+        textPane.setText(textPane.getText() + text);
         JScrollBar vertical = scroll.getVerticalScrollBar();
         vertical.setValue( vertical.getMaximum() );
     }

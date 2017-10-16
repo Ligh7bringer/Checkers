@@ -4,8 +4,9 @@ import Controller.GameHistory;
 import Controller.MoveController;
 
 import java.awt.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+
+//TODO: FIX THE SCREEN AND GRID COORDINATE MESS IN THIS CLASS!!!
 
 public class Board {
     public static final int SIZE = 8; //board width and height, i.e. number of tiles per row and column
@@ -49,9 +50,9 @@ public class Board {
         }
     }
 
-    //the board has its own update
+    //the board has its own validateMove
     //parameters: source x, source y, destination x, destination y
-    public void update(int row, int col, int destRow, int destCol) {
+    public void validateMove(int row, int col, int destRow, int destCol) {
         //calculate position in the grid from screen coordinates
         //is this accurate enough though?
         //int col = convertToGridCoords(sx);
@@ -59,10 +60,18 @@ public class Board {
         //int destCol = convertToGridCoords(dx);
         //int destRow = convertToGridCoords(dy);
 
-        if(validatePlayer(row, col)) {
-            if(moveController.isMoveJump(row, col, destRow, destCol)) {
+        System.out.println(row + " " + col + " -> " + destRow + " " + destCol);
+
+        if(validatePlayer(row, col)) { //make sure the player is trying to move their own piece
+            //force the player to jump if they can
+            if(!moveController.getAllJumps().isEmpty() && !moveController.getAllJumps().contains(new GridPosition(row, col))) {
+                for(GridPosition p : moveController.getAllJumps())
+                    System.out.println("THIS PIECE CAN JUMP THO: " + p.getX() + ", " + p.getY());
+                System.out.println("You have to take a jump if you have one available!");
+            } else if(moveController.getPossibleJumps(row, col).contains(new GridPosition(destRow, destCol))) {
                 movePiece(row, col, destRow, destCol);
-                GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol)); //TODO fix this so it gets the right destination coordinates
+                removeEnemyAfterJump(row, col, destRow, destCol);
+                GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol));
                 switchPlayer();
             } else if (moveController.isMoveLegal(row, col, destRow, destCol)) {
                 movePiece(row, col, destRow, destCol);
@@ -78,6 +87,7 @@ public class Board {
             //highlightedTile = null;
             System.out.println("INVALID PIECE");
         }
+
         availableTiles.clear();
         highlightedTile = null;
     }
@@ -120,9 +130,9 @@ public class Board {
         }
 
         if(availableTiles != null) {
-            g2d.setColor(new Color(0, 255, 0, 100));
-            for(int i = 0; i < availableTiles.size(); i++) {
-                g2d.fillRect(availableTiles.get(i).getY() * TILE_WIDTH, availableTiles.get(i).getX() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            g2d.setColor(new Color(0, 204, 0));
+            for(GridPosition gp : availableTiles) {
+                g2d.fillRect(gp.getY() * TILE_WIDTH, gp.getX() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             }
         }
 
@@ -146,6 +156,7 @@ public class Board {
     public void movePiece(int sourceX, int sourceY, int destX, int destY) {
         pieces[destX][destY] = pieces[sourceX][sourceY]; //move to new position
         pieces[sourceX][sourceY] = null; //make old position null, it should be empty
+        pieces[destX][destY].setGridPosition(new GridPosition(destX, destY));
     }
 
     //returns true if there is a piece on a given tile
@@ -179,6 +190,12 @@ public class Board {
 
     //returns piece at grid coordinates gridX and gridY
     public Piece getPiece(int gridX, int gridY) {
+        try {
+            Piece p = pieces[gridX][gridY];
+        } catch (Exception e) {
+            System.out.println("There's nothing here :(");
+            return null;
+        }
         return pieces[gridX][gridY];
     }
 
@@ -187,11 +204,13 @@ public class Board {
         return pieces;
     }
 
+    //get the colour of the player whose turn it is
+    //for some reason i had to swap white and black even though if player one == true that means it's BLACK's turn???
     public static Type getCurrentColour() {
         if(playerOne)
-            return Type.WHITE;
-        else
             return Type.BLACK;
+        else
+            return Type.WHITE;
     }
 
     //remove piece at position gridX, gridY
@@ -199,24 +218,46 @@ public class Board {
         pieces[gridX][gridY] = null;
     }
 
+    private void removeEnemyAfterJump(int row, int col, int destRow, int destCol) {
+        int rowDiff = destRow - row;
+        int colDiff = destCol - col;
+        if(getCurrentPlayer() == 2) {
+            if(rowDiff > 0 && colDiff > 0)
+                removePiece(row+1, col+1);
+            else if(rowDiff > 0 && colDiff < 0)
+                removePiece(row + 1, col - 1);
+        } else if(getCurrentPlayer() == 1) {
+            if(rowDiff < 0 && colDiff > 0)
+                removePiece(row-1, col+1);
+            else if(rowDiff < 0 && colDiff < 0)
+                removePiece(row-1, col-1);
+        }
+    }
+
+    //save the coordinates of the tile that needs to be highlighted
     private void highlightTile(int x, int y) {
         highlightedTile = new GridPosition(x, y);
     }
 
+    //save the coordinates of the tile which has been clicked
     public void addSource(int x, int y) {
        availableTiles = new ArrayList<>();
        sourceX = convertToGridCoords(x);
        sourceY = convertToGridCoords(y);
        highlightTile(sourceX, sourceY);
 
-       if(validatePlayer(sourceY, sourceX))
-           availableTiles = moveController.getPossibleMoves(sourceY, sourceX);
+       if(validatePlayer(sourceY, sourceX)) {
+           availableTiles.addAll(moveController.getPossibleJumps(sourceY, sourceX));
+           if(availableTiles.isEmpty())
+               availableTiles = moveController.getPossibleMoves(sourceY, sourceX);
+       }
     }
 
+    //save the coordinates of the destination tile
     public void addDestination(int x, int y) {
         destX = convertToGridCoords(y);
         destY = convertToGridCoords(x);
-        System.out.println("Source: " + sourceX + ", " + sourceY + " Destination: " + destX + ", " + destY);
-        update(sourceY, sourceX, destX, destY);
+        //System.out.println("Source: " + sourceY + ", " + sourceX + " Destination: " + destX + ", " + destY);
+        validateMove(sourceY, sourceX, destX, destY);
     }
 }

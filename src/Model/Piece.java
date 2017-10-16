@@ -50,7 +50,28 @@ public class Piece {
         return type;
     }
 
+    public void setGridPosition(GridPosition gp) {
+        this.gridPosition = gp;
+    }
+
     public GridPosition getGridPosition() {
         return gridPosition;
+    }
+
+    //same problem as GridPosition, need to have a custom equals method
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!Piece.class.isAssignableFrom(obj.getClass())) {
+            return false;
+        }
+        final Piece other = (Piece) obj;
+        if ((this.getGridPosition() != other.getGridPosition() || this.getType() != other.getType())) {
+            return false;
+        }
+
+        return true;
     }
 }

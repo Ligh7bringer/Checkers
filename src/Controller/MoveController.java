@@ -84,7 +84,9 @@ public class MoveController {
             }
 
         } catch(ArrayIndexOutOfBoundsException e) {
-            System.out.println("FUCK SAKE!!");
+            //System.out.println("getPossibleJumps array out of bounds!");
+        } catch(NullPointerException e) {
+            //System.out.println("getPossibleJumps null pointer!");
         }
 
         return jumps;
@@ -121,19 +123,22 @@ public class MoveController {
 
     //a player has to jump if they can so this will be needed later
     //TODO change this so it actually returns all pieces which can jump
-    public void hasToJump() {
-        for(Piece[] row : board.getPieces()) {
-            for(Piece p : row) {
-                if(p != null && p.getType() == board.getCurrentColour()) {
-                    System.out.println(p.getType());
+    public ArrayList<GridPosition> getAllJumps() {
+        ArrayList<GridPosition> canJump = new ArrayList<>();
+
+        for(int i = 0; i < Board.SIZE; i++) {
+            for (int j = 0; j < Board.SIZE; j++) {
+                if(board.getPiece(i, j) != null && board.getPiece(i, j).getType() == Board.getCurrentColour()) {
+                    System.out.println(Board.getCurrentColour());
+                    if(!getPossibleJumps(i, j).isEmpty()) {
+                        canJump.add(new GridPosition(i, j));
+                    }
                 }
             }
         }
+
+        return canJump;
     }
 
-    //so we need this method to enforce jumping when possible TODO IMPLEMENT maybe find a better way?
-    private boolean canJump(int gridX, int gridY) {
-        return false;
-    }
 
 }
