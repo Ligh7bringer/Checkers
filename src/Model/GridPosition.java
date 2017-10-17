@@ -31,6 +31,7 @@ public class GridPosition {
         if (!GridPosition.class.isAssignableFrom(obj.getClass())) {
             return false;
         }
+
         final GridPosition other = (GridPosition) obj;
         if ((this.getX() != other.getX() || this.getY() != other.getY())) {
             return false;

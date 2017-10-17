@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class MoveController {
 
-    private Board board;
+    private static Board board;
 
     public MoveController(Board b) {
         board = b;
@@ -93,29 +93,37 @@ public class MoveController {
     }
 
     //
-    public ArrayList<GridPosition> getPossibleMoves(int gridX, int gridY) {
+    public ArrayList<GridPosition> getPossibleMoves(int row, int col) {
         ArrayList<GridPosition> moves = new ArrayList<>();
-        if(board.isTileOccupied(gridX, gridY)) { //if source has a piece
-            Piece piece = board.getPiece(gridX, gridY);
-            if(piece.getType() == Type.WHITE) {
-                //legal moves for white pieces:
-                //move diagonally to the left
-                if(board.getPiece(gridX+1, gridY-1) == null) {
-                    moves.add(new GridPosition(gridX+1, gridY-1));
-                }
-                if (board.getPiece(gridX+1, gridY+1) == null) { //move diagonally to the right
-                    moves.add(new GridPosition(gridX+1, gridY+1));
-                }
-            } else if (piece.getType() == Type.BLACK) {
-                //legal moves for black, in the opposite direction:
-                //move diagonally to the left
-                if(board.getPiece(gridX-1, gridY-1) == null){
-                    moves.add(new GridPosition(gridX-1, gridY-1));
-                }
-                if (board.getPiece(gridX-1, gridY+1) == null) { //move diagonally to the right
-                    moves.add(new GridPosition(gridX-1, gridY+1));
+        try {
+            if (board.isTileOccupied(row, col)) { //if source has a piece
+                Piece piece = board.getPiece(row, col);
+                if (piece.getType() == Type.WHITE) {
+                    //legal moves for white pieces:
+                    //move diagonally to the left
+                    if (!board.isTileOccupied(row + 1, col - 1) ) {
+                        if(col != 0 || row != 7)
+                            moves.add(new GridPosition(row + 1, col - 1));
+                    }
+                    if (!board.isTileOccupied(row + 1, col + 1)) { //move diagonally to the right
+                        if(row != 7 || col != 7)
+                            moves.add(new GridPosition(row + 1, col + 1));
+                    }
+                } else if (piece.getType() == Type.BLACK) {
+                    //legal moves for black, in the opposite direction:
+                    //move diagonally to the left
+                    if (!board.isTileOccupied(row - 1, col - 1)) {
+                        if(row != 0 || col != 0)
+                            moves.add(new GridPosition(row - 1, col - 1));
+                    }
+                    if (!board.isTileOccupied(row - 1, col + 1)) { //move diagonally to the right
+                        if(row != 0 || col != 7)
+                            moves.add(new GridPosition(row - 1, col + 1));
+                    }
                 }
             }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("index is out of bounds in getPossibleMoves!!!");
         }
 
         return moves;
@@ -128,8 +136,7 @@ public class MoveController {
 
         for(int i = 0; i < Board.SIZE; i++) {
             for (int j = 0; j < Board.SIZE; j++) {
-                if(board.getPiece(i, j) != null && board.getPiece(i, j).getType() == Board.getCurrentColour()) {
-                    System.out.println(Board.getCurrentColour());
+                if(board.isTileOccupied(i, j) && board.getPiece(i, j).getType() == Board.getCurrentColour()) {
                     if(!getPossibleJumps(i, j).isEmpty()) {
                         canJump.add(new GridPosition(i, j));
                     }
@@ -138,6 +145,25 @@ public class MoveController {
         }
 
         return canJump;
+    }
+
+    public static void undoLastMove() {
+        GridPosition[] gps;
+        if(!GameHistory.getMoves().isEmpty()) {
+            gps = GameHistory.getMoves().removeLast();
+
+            GridPosition source = gps[1];
+            GridPosition dest = gps[0];
+            GridPosition removedPiece = gps[2];
+
+            board.movePiece(source.getX(), source.getY(), dest.getX(), dest.getY());
+            if(removedPiece != null)
+                board.getPieces()[removedPiece.getX()][removedPiece.getY()] = new Piece(Board.getCurrentColour(), removedPiece);
+
+            board.switchPlayer();
+        } else {
+            System.out.println("No more moves!");
+        }
     }
 
 

@@ -53,29 +53,19 @@ public class Board {
     //the board has its own validateMove
     //parameters: source x, source y, destination x, destination y
     public void validateMove(int row, int col, int destRow, int destCol) {
-        //calculate position in the grid from screen coordinates
-        //is this accurate enough though?
-        //int col = convertToGridCoords(sx);
-        //int row = convertToGridCoords(sy);
-        //int destCol = convertToGridCoords(dx);
-        //int destRow = convertToGridCoords(dy);
-
-        System.out.println(row + " " + col + " -> " + destRow + " " + destCol);
-
         if(validatePlayer(row, col)) { //make sure the player is trying to move their own piece
             //force the player to jump if they can
-            if(!moveController.getAllJumps().isEmpty() && !moveController.getAllJumps().contains(new GridPosition(row, col))) {
-                for(GridPosition p : moveController.getAllJumps())
-                    System.out.println("THIS PIECE CAN JUMP THO: " + p.getX() + ", " + p.getY());
+            if((!moveController.getAllJumps().isEmpty() && !moveController.getAllJumps().contains(new GridPosition(row, col))) || (!moveController.getPossibleJumps(row, col).isEmpty())
+                    && !moveController.getPossibleJumps(row, col).contains(new GridPosition(destRow, destCol))) {
                 System.out.println("You have to take a jump if you have one available!");
             } else if(moveController.getPossibleJumps(row, col).contains(new GridPosition(destRow, destCol))) {
                 movePiece(row, col, destRow, destCol);
-                removeEnemyAfterJump(row, col, destRow, destCol);
-                GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol));
+                GridPosition gp = removeEnemyAfterJump(row, col, destRow, destCol);
+                GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), gp);
                 switchPlayer();
             } else if (moveController.isMoveLegal(row, col, destRow, destCol)) {
                 movePiece(row, col, destRow, destCol);
-                GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol));
+                GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), null);
                 switchPlayer();
             } else {
                 System.out.println("Illegal move!");
@@ -130,7 +120,7 @@ public class Board {
         }
 
         if(availableTiles != null) {
-            g2d.setColor(new Color(0, 204, 0));
+            g2d.setColor(new Color(153, 255, 51));
             for(GridPosition gp : availableTiles) {
                 g2d.fillRect(gp.getY() * TILE_WIDTH, gp.getX() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             }
@@ -139,13 +129,13 @@ public class Board {
     }
 
     //we need this to make sure a player can only move their own pieces
-    public boolean validatePlayer(int gridX, int gridY) {
-        if(getPiece(gridX, gridY) == null) {
+    public boolean validatePlayer(int row, int col) {
+        if(getPiece(row, col) == null) {
             System.out.println("empty tile at" + sourceX + ", " + sourceY);
             return false;
-        } else if(getPiece(gridX, gridY).getType() == Type.BLACK && playerOne) {
+        } else if(getPiece(row, col).getType() == Type.BLACK && playerOne) {
             return true;
-        } else if(getPiece(gridX, gridY).getType() == Type.WHITE && !playerOne) {
+        } else if(getPiece(row, col).getType() == Type.WHITE && !playerOne) {
             return true;
         }
 
@@ -161,18 +151,16 @@ public class Board {
 
     //returns true if there is a piece on a given tile
     //return false if tile is unoccupied
-    public boolean isTileOccupied(int gridX, int gridY) {
-        if(pieces[gridX][gridY] != null) {
-            //System.out.println("Tile " + gridX + ", " + gridY + " is occupied");
+    public boolean isTileOccupied(int row, int col) {
+        if(pieces[row][col] != null) {
             return true;
         }
 
-        //System.out.println("Tile " + gridX + ", " + gridY + " is unoccupied");
         return false;
     }
 
     //this will be used to indicate it's the next player's turn
-    private void switchPlayer() {
+    public void switchPlayer() {
         playerOne = !playerOne;
     }
 
@@ -189,14 +177,11 @@ public class Board {
     }
 
     //returns piece at grid coordinates gridX and gridY
-    public Piece getPiece(int gridX, int gridY) {
-        try {
-            Piece p = pieces[gridX][gridY];
-        } catch (Exception e) {
-            System.out.println("There's nothing here :(");
+    public Piece getPiece(int row, int col) {
+        if(pieces[row][col] == null)
             return null;
-        }
-        return pieces[gridX][gridY];
+
+        return pieces[row][col];
     }
 
     //returns the whole array of pieces
@@ -205,7 +190,6 @@ public class Board {
     }
 
     //get the colour of the player whose turn it is
-    //for some reason i had to swap white and black even though if player one == true that means it's BLACK's turn???
     public static Type getCurrentColour() {
         if(playerOne)
             return Type.BLACK;
@@ -218,20 +202,30 @@ public class Board {
         pieces[gridX][gridY] = null;
     }
 
-    private void removeEnemyAfterJump(int row, int col, int destRow, int destCol) {
+    private GridPosition removeEnemyAfterJump(int row, int col, int destRow, int destCol) {
         int rowDiff = destRow - row;
         int colDiff = destCol - col;
         if(getCurrentPlayer() == 2) {
-            if(rowDiff > 0 && colDiff > 0)
-                removePiece(row+1, col+1);
-            else if(rowDiff > 0 && colDiff < 0)
+            if(rowDiff > 0 && colDiff > 0) {
+                removePiece(row + 1, col + 1);
+                return new GridPosition(row + 1, col + 1);
+            }
+            else if(rowDiff > 0 && colDiff < 0) {
                 removePiece(row + 1, col - 1);
+                return new GridPosition(row + 1, col - 1);
+            }
         } else if(getCurrentPlayer() == 1) {
-            if(rowDiff < 0 && colDiff > 0)
-                removePiece(row-1, col+1);
-            else if(rowDiff < 0 && colDiff < 0)
-                removePiece(row-1, col-1);
+            if(rowDiff < 0 && colDiff > 0) {
+                removePiece(row - 1, col + 1);
+                return new GridPosition(row - 1, col + 1);
+            }
+            else if(rowDiff < 0 && colDiff < 0) {
+                removePiece(row - 1, col - 1);
+                return new GridPosition(row - 1, col - 1);
+            }
         }
+
+        return new GridPosition(0, 0);
     }
 
     //save the coordinates of the tile that needs to be highlighted
