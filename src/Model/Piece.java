@@ -18,31 +18,48 @@ public class Piece {
         //load the appropriate image
         if(this.getType() == Type.BLACK)
             try {
-                image = ImageIO.read(new File("res/black_pawn.png"));
+                image = ImageIO.read(new File("res/blackpiece.png"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         else if(this.getType() == Type.WHITE)
             try {
-                image = ImageIO.read(new File("res/white_pawn.png"));
+                image = ImageIO.read(new File("res/whitepiece.png"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            this.gridPosition = gp;
+        this.gridPosition = gp;
     }
 
     //pieces should draw themselves
     public void paintComponent(Graphics g, int x, int y) {
-        g.drawImage(image, x + 20, y + 20, null); //TODO:change this to calculate center of tile
+        g.drawImage(image, x + 10, y + 10, null); //TODO:change this to calculate center of tile
+    }
+
+    public void update() {
+        crownPiece();
+
     }
 
     //this method will change the piece type to black or white king
-    public void crownPiece() {
-        if(this.type == Type.WHITE)
+    private void crownPiece() {
+        if(this.type == Type.WHITE && this.getGridPosition().getRow() == 7) {
             this.type = Type.WHITE_KING;
-        else if(this.type == Type.BLACK)
+            try {
+                image = ImageIO.read(new File("res/whiteking.png"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else if(this.type == Type.BLACK && this.getGridPosition().getRow() == 0) {
             this.type = Type.BLACK_KING;
+            try {
+                image = ImageIO.read(new File("res/blackking.png"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     //returns the type of the piece

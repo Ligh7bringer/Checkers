@@ -62,8 +62,12 @@ public class Board {
                 movePiece(row, col, destRow, destCol);
                 GridPosition gp = removeEnemyAfterJump(row, col, destRow, destCol);
                 GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), gp);
+                if(!moveController.getPossibleJumps(destRow, destCol).isEmpty()) {
+                    switchPlayer();
+                    System.out.println("Double jump!!!");
+                }
                 switchPlayer();
-            } else if (moveController.isMoveLegal(row, col, destRow, destCol)) {
+            } else if (!moveController.getPossibleMoves(row, col).isEmpty() && moveController.getPossibleMoves(row, col).contains(new GridPosition(destRow, destCol))) {
                 movePiece(row, col, destRow, destCol);
                 GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), null);
                 switchPlayer();
@@ -116,26 +120,35 @@ public class Board {
 
         if(highlightedTile != null) {
             g2d.setColor(Color.YELLOW);
-            g2d.drawRect(highlightedTile.getX() * TILE_WIDTH, highlightedTile.getY() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+            g2d.drawRect(highlightedTile.getRow() * TILE_WIDTH, highlightedTile.getCol() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
         }
 
         if(availableTiles != null) {
             g2d.setColor(new Color(153, 255, 51));
             for(GridPosition gp : availableTiles) {
-                g2d.fillRect(gp.getY() * TILE_WIDTH, gp.getX() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+                g2d.fillRect(gp.getCol() * TILE_WIDTH, gp.getRow() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
             }
         }
 
     }
 
+    public void update() {
+        for(int i = 0; i < SIZE; i++) {
+            for(int j = 0; j < SIZE; j++) {
+                if(pieces[i][j] != null)
+                    pieces[i][j].update();
+            }
+        }
+    }
+
     //we need this to make sure a player can only move their own pieces
-    public boolean validatePlayer(int row, int col) {
+    private boolean validatePlayer(int row, int col) {
         if(getPiece(row, col) == null) {
             System.out.println("empty tile at" + sourceX + ", " + sourceY);
             return false;
-        } else if(getPiece(row, col).getType() == Type.BLACK && playerOne) {
+        } else if((getPiece(row, col).getType() == Type.BLACK || getPiece(row, col).getType() == Type.BLACK_KING ) && playerOne) {
             return true;
-        } else if(getPiece(row, col).getType() == Type.WHITE && !playerOne) {
+        } else if((getPiece(row, col).getType() == Type.WHITE || getPiece(row, col).getType() == Type.WHITE_KING )&& !playerOne) {
             return true;
         }
 
@@ -152,12 +165,22 @@ public class Board {
     //returns true if there is a piece on a given tile
     //return false if tile is unoccupied
     public boolean isTileOccupied(int row, int col) {
+        if(!isLegalPos(row, col))
+            return  true;
         if(pieces[row][col] != null) {
             return true;
         }
 
         return false;
     }
+
+    public boolean isLegalPos(int row, int col){
+        if(row < 0 || row >= SIZE || col < 0 || col >= SIZE)
+            return false;
+
+         return true;
+    }
+
 
     //this will be used to indicate it's the next player's turn
     public void switchPlayer() {
@@ -171,15 +194,25 @@ public class Board {
         else
          return 2;
     }
+
+    public static Type getCurrentKing() {
+        if(playerOne)
+            return Type.BLACK_KING;
+        else
+            return Type.WHITE_KING;
+    }
     //convert window coordinates to position in grid
-    public int convertToGridCoords(int screenCoord) {
+    private int convertToGridCoords(int screenCoord) {
         return screenCoord / TILE_WIDTH; //can be divided by tile height as well because they are the same, a tile is square
     }
 
     //returns piece at grid coordinates gridX and gridY
     public Piece getPiece(int row, int col) {
+        if(!isLegalPos(row, col))
+            return new Piece(Type.EMPTY, new GridPosition(-1, -1));
+;
         if(pieces[row][col] == null)
-            return null;
+            return new Piece(Type.EMPTY, new GridPosition(-1, -1));
 
         return pieces[row][col];
     }

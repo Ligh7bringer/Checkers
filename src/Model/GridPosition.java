@@ -1,25 +1,25 @@
 package Model;
 
 public class GridPosition {
-    private int x;
-    private int y;
+    private int row;
+    private int col;
 
-    public GridPosition(int x, int y) {
-        this.x = x;
-        this.y = y;
+    public GridPosition(int row, int col) {
+        this.row = row;
+        this.col = col;
     }
 
-    public int getX() {
-        return x;
+    public int getRow() {
+        return row;
     }
 
-    public int getY() {
-        return y;
+    public int getCol() {
+        return col;
     }
 
     @Override
     public String toString() {
-        return this.getX() + ", " + getY();
+        return this.getRow() + ", " + getCol();
     }
 
     //turns out equals needs to be overridden in order to be able to check if a list contains an object of this type
@@ -33,7 +33,7 @@ public class GridPosition {
         }
 
         final GridPosition other = (GridPosition) obj;
-        if ((this.getX() != other.getX() || this.getY() != other.getY())) {
+        if ((this.getRow() != other.getRow() || this.getCol() != other.getCol())) {
             return false;
         }
 

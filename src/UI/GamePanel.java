@@ -50,6 +50,8 @@ public class GamePanel extends JPanel implements MouseListener {
             clicks = 0;
         }
 
+        board.update();
+
         repaint();
     }
 
