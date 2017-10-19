@@ -2,6 +2,7 @@ package UI;
 
 import Controller.GameHistory;
 import Controller.MoveController;
+import Controller.ReplayHandler;
 import Model.Board;
 import Model.GridPosition;
 
@@ -16,7 +17,7 @@ public class InformationPanel extends JPanel {
     private JLabel info;
     private JTextPane textPane;
     private JScrollPane scroll;
-    private JButton undoBtn, redoBtn;
+    private JButton undoBtn, redoBtn, saveReplayBtn, loadReplayBtn;
 
     public InformationPanel() {
         Dimension size = getPreferredSize();
@@ -51,6 +52,21 @@ public class InformationPanel extends JPanel {
             }
         });
 
+        saveReplayBtn = new JButton("Save replay");
+        saveReplayBtn.addActionListener(e -> {
+            if(saveReplayBtn.isEnabled()) {
+                ReplayHandler.saveReplay();
+            }
+        });
+
+        loadReplayBtn = new JButton("Load replay");
+        loadReplayBtn.addActionListener(e -> {
+            if(loadReplayBtn.isEnabled()) {
+               MoveController.replayGame();
+            }
+        });
+
+
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
 
@@ -77,6 +93,15 @@ public class InformationPanel extends JPanel {
 
         c.anchor = GridBagConstraints.NORTHEAST;
         add(redoBtn, c);
+
+        c.gridy = 4;
+        c.anchor = GridBagConstraints.CENTER;
+        c.weighty = 1;
+        add(saveReplayBtn, c);
+
+        c.gridy = 5;
+        c.anchor = GridBagConstraints.CENTER;
+        add(loadReplayBtn, c);
 
     }
 

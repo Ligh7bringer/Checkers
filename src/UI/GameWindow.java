@@ -82,6 +82,16 @@ public class GameWindow extends JPanel implements Runnable{
         informationPanel.update();
     }
 
+    public void pause() {
+        isRunning = false;
+        try {
+            wait(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        isRunning = true;
+    }
+
     // this will draw everything hopefully
     public void paintComponent(Graphics g) {
         g2d = (Graphics2D) g;

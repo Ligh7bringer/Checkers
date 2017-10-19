@@ -19,7 +19,7 @@ public class GridPosition {
 
     @Override
     public String toString() {
-        return this.getRow() + ", " + getCol();
+        return this.getRow() + " " + getCol();
     }
 
     //turns out equals needs to be overridden in order to be able to check if a list contains an object of this type

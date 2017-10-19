@@ -5,6 +5,8 @@ import Controller.MoveController;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
 
 //TODO: FIX THE SCREEN AND GRID COORDINATE MESS IN THIS CLASS!!!
 
@@ -284,5 +286,13 @@ public class Board {
         destY = convertToGridCoords(x);
         //System.out.println("Source: " + sourceY + ", " + sourceX + " Destination: " + destX + ", " + destY);
         validateMove(sourceY, sourceX, destX, destY);
+    }
+
+    public void replayGame(LinkedList<GridPosition[]> replay) {
+        for(GridPosition[] gps : replay) {
+            movePiece(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
+            if(gps[2] != null)
+                removePiece(gps[2].getRow(), gps[2].getCol());
+        }
     }
 }

@@ -4,9 +4,11 @@ import Model.Board;
 import Model.GridPosition;
 import Model.Piece;
 import Model.Type;
+import sun.awt.image.ImageWatched;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class MoveController {
 
@@ -177,6 +179,10 @@ public class MoveController {
         }
 
         return Type.WHITE;
+    }
+
+    public static void replayGame() {
+        board.replayGame(ReplayHandler.parseReplay());
     }
 
 }
