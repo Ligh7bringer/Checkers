@@ -28,11 +28,9 @@ public class GameWindow extends JPanel implements Runnable{
     private static GamePanel gamePanel;
 
     //constructor
-    private GameWindow() {
+    public GameWindow() {
         setPreferredSize(new Dimension(WIDTH, HEIGHT)); //set window width and height
         setFocusable(true); // this should help with mouse events?
-
-        saveButton = new JButton("Save game");
 
         informationPanel = new InformationPanel();
         gamePanel = new GamePanel();
@@ -99,6 +97,8 @@ public class GameWindow extends JPanel implements Runnable{
 
     //main method
     public static void main(String[] args) {
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> e.printStackTrace());
+
         GameWindow gw = new GameWindow(); //create an object so the constructor is called? is this bad?
         JFrame frame = new JFrame("Checkers"); //create frame
         //set properties of the frame
@@ -110,22 +110,6 @@ public class GameWindow extends JPanel implements Runnable{
         GridBagConstraints c = new GridBagConstraints();
         frame.setLayout(gridBag);
         c.fill = GridBagConstraints.HORIZONTAL;
-
-       /* c.gridx = 0;
-        c.gridy = 0;
-        c.weighty = 1;
-        c.weightx = 0.1;
-        c.anchor = GridBagConstraints.LINE_START;
-        c.fill = SwingConstants.HORIZONTAL;
-        gridBag.setConstraints(saveButton, c);
-        frame.add(saveButton);
-
-        c.gridx = 0;
-        c.gridy = 1;
-        c.anchor = GridBagConstraints.CENTER;
-        c.weighty = 0.5;
-        gridBag.setConstraints(gm, c);
-        frame.add(gm); */
 
         c.gridx = 0;
         c.gridy = 0;
@@ -145,6 +129,8 @@ public class GameWindow extends JPanel implements Runnable{
         frame.setLocationRelativeTo(null); // this should display the window in the middle of the screen ?
         frame.setVisible(true);
         frame.getContentPane().setBackground(Color.WHITE); //this doesn't seem to change the background colour?
+
+
     }
 
 

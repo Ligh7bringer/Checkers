@@ -5,6 +5,7 @@ import Model.GridPosition;
 import Model.Piece;
 import Model.Type;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 public class MoveController {
@@ -115,22 +116,57 @@ public class MoveController {
     }
 
     //undoes the last play
-    public static void undoLastMove() {
-        GridPosition[] gps;
-        if(!GameHistory.getMoves().isEmpty()) {
-            gps = GameHistory.getMoves().removeLast();
+    public static boolean undoLastMove() {
+        GridPosition[] gps = new GridPosition[3];
+        if(!GameHistory.getMoves().isEmpty() && GameHistory.canUndo()) {
+            try {
+                gps = GameHistory.getMoves().get(GameHistory.getCurrentIndex()); //get the last move from game history
+            } catch (IndexOutOfBoundsException e) {
+                System.out.println("Nothing to undo!");
+                return false;
+            }
+            GameHistory.decrementIndex(); //decrement current index
+            //GameHistory.cleanUp();
 
-            GridPosition source = gps[1];
-            GridPosition dest = gps[0];
-            GridPosition removedPiece = gps[2];
+            GridPosition source = gps[1]; //get source
+            GridPosition dest = gps[0]; //get destination
+            GridPosition removedPiece = gps[2]; //get removed piece if move was jump
 
-            board.movePiece(source.getRow(), source.getCol(), dest.getRow(), dest.getCol());
+            board.movePiece(source.getRow(), source.getCol(), dest.getRow(), dest.getCol()); //undo
             if(removedPiece != null)
-                board.getPieces()[removedPiece.getRow()][removedPiece.getCol()] = new Piece(Board.getCurrentColour(), removedPiece);
+                board.getPieces()[removedPiece.getRow()][removedPiece.getCol()] = new Piece(Board.getCurrentColour(), removedPiece); //add the removed piece
+
+            GameHistory.setCanUndo(false);
+            board.switchPlayer(); //switch player
+            return true;
+        } else {
+            System.out.println("No more moves!"); //debug
+            return false;
+        }
+    }
+
+    public static void redoLastMove() {
+        GridPosition[] gps = new GridPosition[3];
+        if(!GameHistory.getMoves().isEmpty()) {
+            try {
+                gps = GameHistory.getMoves().get(GameHistory.getCurrentIndex() + 1); //get the last move from game history
+            } catch (IndexOutOfBoundsException e) {
+                System.out.println("Nothing to redo!");
+                return;
+            }
+            GameHistory.incrementIndex(); //increment current index
+
+            GridPosition source = gps[1]; //get source
+            GridPosition dest = gps[0]; //get destination
+            GridPosition removedPiece = gps[2]; //get removed piece if move was jump
+
+            board.movePiece(dest.getRow(), dest.getCol(), source.getRow(), source.getCol()); //redo
+            if(removedPiece != null)
+                board.removePiece(removedPiece.getRow(), removedPiece.getCol());
 
             board.switchPlayer();
         } else {
-            System.out.println("No more moves!");
+            System.out.println("No more moves");
         }
     }
 

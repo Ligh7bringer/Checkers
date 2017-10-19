@@ -16,7 +16,7 @@ public class InformationPanel extends JPanel {
     private JLabel info;
     private JTextPane textPane;
     private JScrollPane scroll;
-    private JButton undoBtn;
+    private JButton undoBtn, redoBtn;
 
     public InformationPanel() {
         Dimension size = getPreferredSize();
@@ -39,8 +39,15 @@ public class InformationPanel extends JPanel {
         undoBtn = new JButton("Undo");
         undoBtn.addActionListener(e -> {
             if (undoBtn.isEnabled()) {
-                MoveController.undoLastMove();
-                removeLastLine();
+                if(MoveController.undoLastMove())
+                    removeLastLine();
+            }
+        });
+
+        redoBtn = new JButton("Redo");
+        redoBtn.addActionListener(e -> {
+            if(undoBtn.isEnabled()) {
+                MoveController.redoLastMove();
             }
         });
 
@@ -64,9 +71,12 @@ public class InformationPanel extends JPanel {
         add(scroll, c);
 
         c.gridy = 3;
-        c.anchor = GridBagConstraints.NORTH;
+        c.anchor = GridBagConstraints.NORTHWEST;
         c.weighty = 1;
         add(undoBtn, c);
+
+        c.anchor = GridBagConstraints.NORTHEAST;
+        add(redoBtn, c);
 
     }
 

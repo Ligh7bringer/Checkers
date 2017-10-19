@@ -62,6 +62,7 @@ public class Board {
                 movePiece(row, col, destRow, destCol);
                 GridPosition gp = removeEnemyAfterJump(row, col, destRow, destCol);
                 GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), gp);
+                GameHistory.setCanUndo(true);
                 if(!moveController.getPossibleJumps(destRow, destCol).isEmpty()) {
                     switchPlayer();
                     System.out.println("Double jump!!!");
@@ -71,22 +72,19 @@ public class Board {
                 movePiece(row, col, destRow, destCol);
                 GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), null);
                 switchPlayer();
+                GameHistory.setCanUndo(true);
             } else {
                 System.out.println("Illegal move!");
             }
-            //highlightedTile = null;
-
-            //switchPlayer();
         } else {
-            //highlightedTile = null;
-            System.out.println("INVALID PIECE");
+            System.out.println("Invalid piece!");
         }
 
         availableTiles.clear();
         highlightedTile = null;
     }
 
-    //the board should paintComponent itself
+    //the board should paint itself
     public void paintComponent(Graphics2D g2d) {
         //starting coordinates = top left corner of the window
         int x = 0;
@@ -159,7 +157,7 @@ public class Board {
     public void movePiece(int sourceX, int sourceY, int destX, int destY) {
         pieces[destX][destY] = pieces[sourceX][sourceY]; //move to new position
         pieces[sourceX][sourceY] = null; //make old position null, it should be empty
-        pieces[destX][destY].setGridPosition(new GridPosition(destX, destY));
+//        pieces[destX][destY].setGridPosition(new GridPosition(destX, destY));
     }
 
     //returns true if there is a piece on a given tile
