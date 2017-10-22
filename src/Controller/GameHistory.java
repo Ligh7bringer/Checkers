@@ -18,8 +18,6 @@ public class GameHistory {
         moves.add(gps);
         copy.add(gps);
         currentIndex = moves.size() - 1;
-        for(GridPosition[] gp : moves)
-            System.out.println(gp[0].toString() + "; " + gp[1].toString());
     }
 
     public static void cleanUp() {
@@ -28,8 +26,10 @@ public class GameHistory {
         }
     }
 
-    public static void decrementIndex() {
+    static void decrementIndex() {
         currentIndex--;
+        if(currentIndex < 0)
+            currentIndex = 0;
     }
 
     public static void incrementIndex() {

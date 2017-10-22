@@ -1,5 +1,7 @@
 package UI;
 
+import Controller.GameHistory;
+import Controller.MoveController;
 import Model.Board;
 
 import javax.swing.*;
@@ -36,18 +38,14 @@ public class GamePanel extends JPanel implements MouseListener {
         setBackground(Color.WHITE);
     }
 
-    private int sourceX, sourceY, destX, destY;
     public void update() {
         if(clicks == 1) {
-           // sourceX = mouseX;
-            //sourceY = mouseY;
             board.addSource(mouseX, mouseY);
         }
         if(clicks == 2) {
-            //destX = mouseX;
-            //destY = mouseY;
             board.addDestination(mouseX, mouseY);
             clicks = 0;
+            GameHistory.cleanUp();
         }
 
         board.update();

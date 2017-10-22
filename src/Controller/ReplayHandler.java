@@ -38,7 +38,7 @@ public class ReplayHandler {
                 GridPosition dest = gps[1];
                 GridPosition removedPiece = gps[2];
 
-                String text = "asd";
+                String text;
                 if (removedPiece != null)
                     text = source.toString() + ";" + dest.toString() + ";" + removedPiece.toString();
                 else
@@ -66,7 +66,7 @@ public class ReplayHandler {
         }
     }
 
-    public static LinkedList<GridPosition[]> parseReplay() {
+    static LinkedList<GridPosition[]> parseReplay() {
         LinkedList<GridPosition[]> replay = new LinkedList<>();
 
         File file;
@@ -86,22 +86,20 @@ public class ReplayHandler {
             while ((line = bufferedReader.readLine()) != null) {
                 gps =  new GridPosition[3];
                 positions = line.split(";");
-                row = positions[0].split(" ")[0];
-                col = positions[0].split(" ")[1];
+                row = positions[0].split(", ")[0];
+                col = positions[0].split(", ")[1];
                 gps[0] = new GridPosition(Integer.parseInt(row), Integer.parseInt(col));
 
-                row = positions[1].split(" ")[0];
-                col = positions[1].split(" ")[1];
+                row = positions[1].split(", ")[0];
+                col = positions[1].split(", ")[1];
                 gps[1] = new GridPosition(Integer.parseInt(row), Integer.parseInt(col));
 
                 gps[2] = null;
-                if(line.length() == 3) {
-                    row = positions[2].split(" ")[0];
-                    col = positions[2].split(" ")[1];
+                if(positions.length >= 3) {
+                    row = positions[2].split(", ")[0];
+                    col = positions[2].split(", ")[1];
                     gps[2] = new GridPosition(Integer.parseInt(row), Integer.parseInt(col));
                 }
-
-                System.out.println(gps[0].toString() + "; " + gps[1].toString());
 
                 replay.add(gps);
             }
@@ -112,15 +110,7 @@ public class ReplayHandler {
             e.printStackTrace();
         }
 
-        test(replay);
-
         return replay;
     }
-
-    public static void test(LinkedList<GridPosition[]> asd) {
-        for(GridPosition[] gp : asd)
-            System.out.println(gp[0].toString() + " " + gp[1].toString());
-    }
-
 
 }

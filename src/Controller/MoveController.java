@@ -119,7 +119,7 @@ public class MoveController {
 
     //undoes the last play
     public static boolean undoLastMove() {
-        GridPosition[] gps = new GridPosition[3];
+        GridPosition[] gps;
         if(!GameHistory.getMoves().isEmpty() && GameHistory.canUndo()) {
             try {
                 gps = GameHistory.getMoves().get(GameHistory.getCurrentIndex()); //get the last move from game history
@@ -148,7 +148,7 @@ public class MoveController {
     }
 
     public static void redoLastMove() {
-        GridPosition[] gps = new GridPosition[3];
+        GridPosition[] gps;
         if(!GameHistory.getMoves().isEmpty()) {
             try {
                 gps = GameHistory.getMoves().get(GameHistory.getCurrentIndex() + 1); //get the last move from game history
@@ -183,6 +183,7 @@ public class MoveController {
 
     public static void replayGame() {
         board.replayGame(ReplayHandler.parseReplay());
+        Board.startTimer();
     }
 
 }

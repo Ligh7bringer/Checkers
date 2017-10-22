@@ -3,10 +3,10 @@ package Model;
 import Controller.GameHistory;
 import Controller.MoveController;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.concurrent.TimeUnit;
 
 //TODO: FIX THE SCREEN AND GRID COORDINATE MESS IN THIS CLASS!!!
 
@@ -54,7 +54,7 @@ public class Board {
 
     //the board has its own validateMove
     //parameters: source x, source y, destination x, destination y
-    public void validateMove(int row, int col, int destRow, int destCol) {
+    private void validateMove(int row, int col, int destRow, int destCol) {
         if(validatePlayer(row, col)) { //make sure the player is trying to move their own piece
             //force the player to jump if they can
             if((!moveController.getAllJumps().isEmpty() && !moveController.getAllJumps().contains(new GridPosition(row, col))) || (!moveController.getPossibleJumps(row, col).isEmpty())
@@ -167,18 +167,13 @@ public class Board {
     public boolean isTileOccupied(int row, int col) {
         if(!isLegalPos(row, col))
             return  true;
-        if(pieces[row][col] != null) {
-            return true;
-        }
 
-        return false;
+        return pieces[row][col] != null;
+
     }
 
-    public boolean isLegalPos(int row, int col){
-        if(row < 0 || row >= SIZE || col < 0 || col >= SIZE)
-            return false;
-
-         return true;
+    private boolean isLegalPos(int row, int col) {
+        return row >= 0 && row < SIZE && col >= 0 && col < SIZE;
     }
 
 
@@ -210,7 +205,7 @@ public class Board {
     public Piece getPiece(int row, int col) {
         if(!isLegalPos(row, col))
             return new Piece(Type.EMPTY, new GridPosition(-1, -1));
-;
+
         if(pieces[row][col] == null)
             return new Piece(Type.EMPTY, new GridPosition(-1, -1));
 
@@ -284,15 +279,31 @@ public class Board {
     public void addDestination(int x, int y) {
         destX = convertToGridCoords(y);
         destY = convertToGridCoords(x);
-        //System.out.println("Source: " + sourceY + ", " + sourceX + " Destination: " + destX + ", " + destY);
         validateMove(sourceY, sourceX, destX, destY);
     }
 
+    private static Timer timer;
+    public static void startTimer() {
+        timer.start();
+    }
+
     public void replayGame(LinkedList<GridPosition[]> replay) {
-        for(GridPosition[] gps : replay) {
+        timer = new Timer(500, e -> {
+            GridPosition[] gps = replay.removeFirst();
             movePiece(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
-            if(gps[2] != null)
+            if(gps[2] != null) {
                 removePiece(gps[2].getRow(), gps[2].getCol());
-        }
+                System.out.println(gps[2].toString());
+            }
+
+            if(replay.isEmpty())
+                timer.stop();
+        });
+
+
+    }
+
+    public void run() {
+
     }
 }
