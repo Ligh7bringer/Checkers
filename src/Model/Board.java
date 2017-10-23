@@ -181,7 +181,11 @@ public class Board {
     public void movePiece(int sourceX, int sourceY, int destX, int destY) {
         pieces[destX][destY] = pieces[sourceX][sourceY]; //move to new position
         pieces[sourceX][sourceY] = null; //make old position null, it should be empty
-        pieces[destX][destY].setGridPosition(new GridPosition(destX, destY));
+        try {
+            pieces[destX][destY].setGridPosition(new GridPosition(destX, destY));
+        } catch (NullPointerException e) {
+            System.out.println("Nothing to undo");
+        }
     }
 
     //this will be used to indicate it's the next player's turn
@@ -261,10 +265,7 @@ public class Board {
     //returns true if there is a piece on a given tile
     //return false if tile is unoccupied
     public boolean isTileOccupied(int row, int col) {
-        if(!isLegalPos(row, col))
-            return  true;
-
-        return pieces[row][col] != null;
+        return !isLegalPos(row, col) || pieces[row][col] != null;
 
     }
 

@@ -154,6 +154,12 @@ public class MoveController {
             if(removedPiece != null)
                 board.removePiece(removedPiece.getRow(), removedPiece.getCol());
 
+            GameHistory.cleanUp();
+            if(removedPiece != null)
+                GameHistory.recordMove(dest, source, removedPiece);
+            else
+                GameHistory.recordMove(dest, source, null);
+
             board.switchPlayer();
         } else {
             System.out.println("No more moves");

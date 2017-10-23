@@ -27,17 +27,9 @@ public class GameWindow extends JPanel {
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (UnsupportedLookAndFeelException e) {
+        } catch (ClassNotFoundException | InstantiationException |  IllegalAccessException | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
-
-
 
         makeGui();
 
@@ -53,36 +45,28 @@ public class GameWindow extends JPanel {
     }
 
     private void makeGui() {
-        JFrame frame = new JFrame("Checkers"); //create frame
-
-        //set properties of the frame
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setResizable(false);
-
         //layout
         GridBagLayout gridBag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
-        frame.setLayout(gridBag);
-        c.fill = GridBagConstraints.HORIZONTAL;
+        setLayout(gridBag);
+        //c.fill = GridBagConstraints.HORIZONTAL;
 
         c.gridx = 0;
         c.gridy = 0;
-        c.insets = new Insets(3,3,3,3);
+        c.weightx = 1;
+        //c.insets = new Insets(3,3,3,3);
+        c.anchor = GridBagConstraints.WEST;
         gridBag.setConstraints(gamePanel, c);
-        frame.add(gamePanel);
+        add(gamePanel);
 
         c.gridx = 1;
         c.gridy = 0;
-        c.weightx = 1;
-        //c.anchor = GridBagConstraints.NORTH;
+        c.weightx = 0.5;
+        c.anchor = GridBagConstraints.NORTH;
         gridBag.setConstraints(informationPanel, c);
-        frame.add(informationPanel);
+        add(informationPanel);
 
-        frame.pack();
 
-        frame.setLocationRelativeTo(null); // this should display the window in the middle of the screen ?
-        frame.setVisible(true);
-        frame.getContentPane().setBackground(Color.WHITE); //this doesn't seem to change the background colour?
     }
 
 }
