@@ -21,9 +21,12 @@ public class GameHistory {
     }
 
     public static void cleanUp() {
-        while(moves.size() - currentIndex != 1) {
-            moves.removeLast();
+        if(moves.size() != 0) {
+            while (moves.size() - currentIndex != 1) {
+                moves.removeLast();
+            }
         }
+        System.out.println("SIZE: " + moves.size() + "; INDEX: " + currentIndex);
     }
 
     static void decrementIndex() {

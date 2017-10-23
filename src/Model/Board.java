@@ -52,6 +52,27 @@ public class Board {
         }
     }
 
+    //save the coordinates of the tile which has been clicked
+    public void addSource(int x, int y) {
+        availableTiles = new ArrayList<>();
+        sourceX = convertToGridCoords(x);
+        sourceY = convertToGridCoords(y);
+        highlightTile(sourceX, sourceY);
+
+        if(validatePlayer(sourceY, sourceX)) {
+            availableTiles.addAll(moveController.getPossibleJumps(sourceY, sourceX));
+            if(availableTiles.isEmpty())
+                availableTiles = moveController.getPossibleMoves(sourceY, sourceX);
+        }
+    }
+
+    //save the coordinates of the destination tile
+    public void addDestination(int x, int y) {
+        destX = convertToGridCoords(y);
+        destY = convertToGridCoords(x);
+        validateMove(sourceY, sourceX, destX, destY);
+    }
+
     //the board has its own validateMove
     //parameters: source x, source y, destination x, destination y
     private void validateMove(int row, int col, int destRow, int destCol) {
@@ -60,21 +81,21 @@ public class Board {
             if((!moveController.getAllJumps().isEmpty() && !moveController.getAllJumps().contains(new GridPosition(row, col))) || (!moveController.getPossibleJumps(row, col).isEmpty())
                     && !moveController.getPossibleJumps(row, col).contains(new GridPosition(destRow, destCol))) {
                 System.out.println("You have to take a jump if you have one available!");
-            } else if(moveController.getPossibleJumps(row, col).contains(new GridPosition(destRow, destCol))) {
+            } else if(moveController.getPossibleJumps(row, col).contains(new GridPosition(destRow, destCol))) { //jump
                 movePiece(row, col, destRow, destCol);
                 GridPosition gp = removeEnemyAfterJump(row, col, destRow, destCol);
-                GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), gp);
-                GameHistory.setCanUndo(true);
+                GameHistory.cleanUp();
+                GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), gp); //save the move
                 if(!moveController.getPossibleJumps(destRow, destCol).isEmpty()) {
                     switchPlayer();
                     System.out.println("Double jump!!!");
                 }
                 switchPlayer();
-            } else if (!moveController.getPossibleMoves(row, col).isEmpty() && moveController.getPossibleMoves(row, col).contains(new GridPosition(destRow, destCol))) {
+            } else if (!moveController.getPossibleMoves(row, col).isEmpty() && moveController.getPossibleMoves(row, col).contains(new GridPosition(destRow, destCol))) { //regular move
                 movePiece(row, col, destRow, destCol);
+                GameHistory.cleanUp();
                 GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), null);
                 switchPlayer();
-                GameHistory.setCanUndo(true);
             } else {
                 System.out.println("Illegal move!");
             }
@@ -132,6 +153,7 @@ public class Board {
 
     }
 
+    //simple update method which detects which ensures a piece is crowned
     public void update() {
         for(int i = 0; i < SIZE; i++) {
             for(int j = 0; j < SIZE; j++) {
@@ -141,7 +163,7 @@ public class Board {
         }
     }
 
-    //we need this to make sure a player can only move their own pieces
+    //makes sure a player can only move their own pieces during their turn
     private boolean validatePlayer(int row, int col) {
         if(getPiece(row, col) == null) {
             System.out.println("empty tile at" + sourceX + ", " + sourceY);
@@ -159,77 +181,25 @@ public class Board {
     public void movePiece(int sourceX, int sourceY, int destX, int destY) {
         pieces[destX][destY] = pieces[sourceX][sourceY]; //move to new position
         pieces[sourceX][sourceY] = null; //make old position null, it should be empty
-//        pieces[destX][destY].setGridPosition(new GridPosition(destX, destY));
+        pieces[destX][destY].setGridPosition(new GridPosition(destX, destY));
     }
-
-    //returns true if there is a piece on a given tile
-    //return false if tile is unoccupied
-    public boolean isTileOccupied(int row, int col) {
-        if(!isLegalPos(row, col))
-            return  true;
-
-        return pieces[row][col] != null;
-
-    }
-
-    private boolean isLegalPos(int row, int col) {
-        return row >= 0 && row < SIZE && col >= 0 && col < SIZE;
-    }
-
 
     //this will be used to indicate it's the next player's turn
     public void switchPlayer() {
         playerOne = !playerOne;
     }
 
-    //return the player who is supposed to play now
-    public static int getCurrentPlayer() {
-        if(playerOne)
-            return 1;
-        else
-         return 2;
-    }
-
-    public static Type getCurrentKing() {
-        if(playerOne)
-            return Type.BLACK_KING;
-        else
-            return Type.WHITE_KING;
-    }
     //convert window coordinates to position in grid
     private int convertToGridCoords(int screenCoord) {
         return screenCoord / TILE_WIDTH; //can be divided by tile height as well because they are the same, a tile is square
     }
 
-    //returns piece at grid coordinates gridX and gridY
-    public Piece getPiece(int row, int col) {
-        if(!isLegalPos(row, col))
-            return new Piece(Type.EMPTY, new GridPosition(-1, -1));
-
-        if(pieces[row][col] == null)
-            return new Piece(Type.EMPTY, new GridPosition(-1, -1));
-
-        return pieces[row][col];
-    }
-
-    //returns the whole array of pieces
-    public Piece[][] getPieces() {
-        return pieces;
-    }
-
-    //get the colour of the player whose turn it is
-    public static Type getCurrentColour() {
-        if(playerOne)
-            return Type.BLACK;
-        else
-            return Type.WHITE;
-    }
-
-    //remove piece at position gridX, gridY
+    //removes piece at position gridX, gridY
     public void removePiece(int gridX, int gridY) {
         pieces[gridX][gridY] = null;
     }
 
+    //calculates the position of a piece which needs to be removed after a jump and returns its coordinates
     private GridPosition removeEnemyAfterJump(int row, int col, int destRow, int destCol) {
         int rowDiff = destRow - row;
         int colDiff = destCol - col;
@@ -261,32 +231,13 @@ public class Board {
         highlightedTile = new GridPosition(x, y);
     }
 
-    //save the coordinates of the tile which has been clicked
-    public void addSource(int x, int y) {
-       availableTiles = new ArrayList<>();
-       sourceX = convertToGridCoords(x);
-       sourceY = convertToGridCoords(y);
-       highlightTile(sourceX, sourceY);
-
-       if(validatePlayer(sourceY, sourceX)) {
-           availableTiles.addAll(moveController.getPossibleJumps(sourceY, sourceX));
-           if(availableTiles.isEmpty())
-               availableTiles = moveController.getPossibleMoves(sourceY, sourceX);
-       }
-    }
-
-    //save the coordinates of the destination tile
-    public void addDestination(int x, int y) {
-        destX = convertToGridCoords(y);
-        destY = convertToGridCoords(x);
-        validateMove(sourceY, sourceX, destX, destY);
-    }
-
+    //timer to add a delay between moves during replay
     private static Timer timer;
     public static void startTimer() {
         timer.start();
     }
 
+    //replay a game
     public void replayGame(LinkedList<GridPosition[]> replay) {
         timer = new Timer(500, e -> {
             GridPosition[] gps = replay.removeFirst();
@@ -299,11 +250,61 @@ public class Board {
             if(replay.isEmpty())
                 timer.stop();
         });
+    }
 
+    //All the getters one might possibly need:
+    //is a position in the grid?
+    private boolean isLegalPos(int row, int col) {
+        return row >= 0 && row < SIZE && col >= 0 && col < SIZE;
+    }
+
+    //returns true if there is a piece on a given tile
+    //return false if tile is unoccupied
+    public boolean isTileOccupied(int row, int col) {
+        if(!isLegalPos(row, col))
+            return  true;
+
+        return pieces[row][col] != null;
 
     }
 
-    public void run() {
+    //returns piece at grid coordinates gridX and gridY
+    public Piece getPiece(int row, int col) {
+        if(!isLegalPos(row, col))
+            return new Piece(Type.EMPTY, new GridPosition(-1, -1));
 
+        if(pieces[row][col] == null)
+            return new Piece(Type.EMPTY, new GridPosition(-1, -1));
+
+        return pieces[row][col];
+    }
+
+    //returns the whole array of pieces
+    public Piece[][] getPieces() {
+        return pieces;
+    }
+
+    //get the colour of the player whose turn it is
+    public static Type getCurrentColour() {
+        if(playerOne)
+            return Type.BLACK;
+        else
+            return Type.WHITE;
+    }
+
+    //return the player who is supposed to play now
+    public static int getCurrentPlayer() {
+        if(playerOne)
+            return 1;
+        else
+            return 2;
+    }
+
+    //returns current player's king colour
+    public static Type getCurrentKing() {
+        if(playerOne)
+            return Type.BLACK_KING;
+        else
+            return Type.WHITE_KING;
     }
 }

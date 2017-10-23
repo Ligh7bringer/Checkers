@@ -19,10 +19,14 @@ public class InformationPanel extends JPanel {
     private JScrollPane scroll;
     private JButton undoBtn, redoBtn, saveReplayBtn, loadReplayBtn;
 
+    public static final int WIDTH = 200;
+    public static final int HEIGHT = Board.SIZE * Board.TILE_HEIGHT;
+
+
     public InformationPanel() {
         Dimension size = getPreferredSize();
-        size.width = 200;
-        size.height = Board.SIZE * Board.TILE_HEIGHT;
+        size.width = WIDTH;
+        size.height = HEIGHT;
         setPreferredSize(size);
 
         setBorder(BorderFactory.createTitledBorder("Game Stats:"));
@@ -111,8 +115,6 @@ public class InformationPanel extends JPanel {
         if(!GameHistory.getCopy().isEmpty()) {
             updateMoveHistory();
         }
-
-        validate();
     }
 
     private void updateMoveHistory() {
@@ -140,7 +142,10 @@ public class InformationPanel extends JPanel {
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
-        int lastLineBreak = content.lastIndexOf('\n');
+        int lastLineBreak = 0;
+        if (content != null) {
+            lastLineBreak = content.lastIndexOf('\n');
+        }
         try {
             textPane.getDocument().remove(lastLineBreak, textPane.getDocument().getLength() - lastLineBreak);
         } catch (Exception e) {

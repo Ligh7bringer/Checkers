@@ -18,42 +18,35 @@ public class MoveController {
         board = b;
     }
 
-    //this should be a separate method because we don't want to have one huge method that does everything
-    //TODO can this be done in a different way without so many if...else statements?
+    //returns all possible landing positions after a jump
     public ArrayList<GridPosition> getPossibleJumps(int row, int col) {
         ArrayList<GridPosition> jumps = new ArrayList<>();
         Piece piece = board.getPiece(row, col);
         try {
             if (piece.getType() == Type.WHITE || piece.getType() == Type.WHITE_KING || piece.getType() == Type.BLACK_KING ) {
-                //if(board.isLegalPos(row + 1, col - 1))
-                    if (board.isTileOccupied(row, col) && ( board.isTileOccupied(row + 1, col - 1)
+                if (board.isTileOccupied(row, col) && ( board.isTileOccupied(row + 1, col - 1)
                             && board.getPiece(row + 1, col - 1).getType() == getOppositeType(piece.getType())) && !board.isTileOccupied(row + 2, col - 2)) {
-                        jumps.add(new GridPosition(row + 2, col - 2));
-                    }
-                //if(board.isLegalPos(row + 1, col + 1))
-                    if (board.isTileOccupied(row, col) && (board.isTileOccupied(row + 1, col + 1)
-                            && board.getPiece(row + 1, col + 1).getType() == getOppositeType(piece.getType())) && !board.isTileOccupied(row + 2, col + 2)) {
-                        jumps.add(new GridPosition(row + 2, col + 2));
-                    }
+                    jumps.add(new GridPosition(row + 2, col - 2));
+                }
+                if (board.isTileOccupied(row, col) && (board.isTileOccupied(row + 1, col + 1)
+                        && board.getPiece(row + 1, col + 1).getType() == getOppositeType(piece.getType())) && !board.isTileOccupied(row + 2, col + 2)) {
+                    jumps.add(new GridPosition(row + 2, col + 2));
+                }
             }
-
-            if(piece.getType() == Type.BLACK || piece.getType() == Type.BLACK_KING || piece.getType() == Type.WHITE_KING) {
-                //if(board.isLegalPos(row - 1, col - 1))
-                    if (board.isTileOccupied(row, col) && (board.isTileOccupied(row - 1, col - 1) && board.getPiece(row - 1, col - 1).getType() == getOppositeType(piece.getType()))
+            if(piece.getType() == Type.BLACK || piece.getType() == Type.WHITE_KING || piece.getType() == Type.BLACK_KING) {
+                if (board.isTileOccupied(row, col) && (board.isTileOccupied(row - 1, col - 1) && board.getPiece(row - 1, col - 1).getType() == getOppositeType(piece.getType()))
                             && !board.isTileOccupied(row - 2, col - 2)) {
-                        jumps.add(new GridPosition(row - 2, col - 2));
-                    }
-                //if(board.isLegalPos(row - 1, col + 1))
-                    if(board.isTileOccupied(row, col) && (board.isTileOccupied(row - 1, col + 1) && board.getPiece(row - 1, col + 1).getType() == getOppositeType(piece.getType()))
-                            && !board.isTileOccupied(row-2, col+2)) {
-                        jumps.add(new GridPosition(row-2, col+2));
-                    }
+                    jumps.add(new GridPosition(row - 2, col - 2));
+                }
+                if(board.isTileOccupied(row, col) && (board.isTileOccupied(row - 1, col + 1) && board.getPiece(row - 1, col + 1).getType() == getOppositeType(piece.getType()))
+                        && !board.isTileOccupied(row-2, col+2)) {
+                    jumps.add(new GridPosition(row-2, col+2));
+                }
             }
-
         } catch(ArrayIndexOutOfBoundsException e) {
-            System.out.println("getPossibleJumps array out of bounds!");
+            System.out.println("getPossibleJumps array out of bounds exception!");
         } catch(NullPointerException e) {
-            System.out.println("getPossibleJumps null pointer!");
+            System.out.println("getPossibleJumps null pointer exception!");
         }
 
         return jumps;
@@ -68,26 +61,22 @@ public class MoveController {
                 if (piece.getType() == Type.WHITE || piece.getType() == Type.WHITE_KING || piece.getType() == Type.BLACK_KING) {
                     //legal moves for white pieces:
                     //move diagonally to the left
-                    //if(col != 0 || row != 7)
-                        if (!board.isTileOccupied(row + 1, col - 1) ) {
-                            moves.add(new GridPosition(row + 1, col - 1));
-                        }
-                    //if(row != 7 || col != 7)
-                        if (!board.isTileOccupied(row + 1, col + 1)) { //move diagonally to the right
-                            moves.add(new GridPosition(row + 1, col + 1));
-                        }
+                    if (!board.isTileOccupied(row + 1, col - 1) ) {
+                        moves.add(new GridPosition(row + 1, col - 1));
+                    }
+                    if (!board.isTileOccupied(row + 1, col + 1)) { //move diagonally to the right
+                        moves.add(new GridPosition(row + 1, col + 1));
+                    }
                 }
                 if (piece.getType() == Type.BLACK || piece.getType() == Type.WHITE_KING || piece.getType() == Type.BLACK_KING) {
                     //legal moves for black, in the opposite direction:
                     //move diagonally to the left
-                    //if(row != 0 || col != 0)
-                        if (!board.isTileOccupied(row - 1, col - 1)) {
-                                moves.add(new GridPosition(row - 1, col - 1));
-                        }
-                    //if(row != 0 || col != 7)
-                        if (!board.isTileOccupied(row - 1, col + 1)) { //move diagonally to the right
-                            moves.add(new GridPosition(row - 1, col + 1));
-                        }
+                    if (!board.isTileOccupied(row - 1, col - 1)) {
+                        moves.add(new GridPosition(row - 1, col - 1));
+                    }
+                    if (!board.isTileOccupied(row - 1, col + 1)) { //move diagonally to the right
+                        moves.add(new GridPosition(row - 1, col + 1));
+                    }
                 }
             }
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -120,7 +109,7 @@ public class MoveController {
     //undoes the last play
     public static boolean undoLastMove() {
         GridPosition[] gps;
-        if(!GameHistory.getMoves().isEmpty() && GameHistory.canUndo()) {
+        if(!GameHistory.getMoves().isEmpty()) {
             try {
                 gps = GameHistory.getMoves().get(GameHistory.getCurrentIndex()); //get the last move from game history
             } catch (IndexOutOfBoundsException e) {
@@ -138,7 +127,6 @@ public class MoveController {
             if(removedPiece != null)
                 board.getPieces()[removedPiece.getRow()][removedPiece.getCol()] = new Piece(Board.getCurrentColour(), removedPiece); //add the removed piece
 
-            GameHistory.setCanUndo(false);
             board.switchPlayer(); //switch player
             return true;
         } else {

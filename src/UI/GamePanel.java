@@ -39,20 +39,12 @@ public class GamePanel extends JPanel implements MouseListener {
     }
 
     public void update() {
-        if(clicks == 1) {
-            board.addSource(mouseX, mouseY);
-        }
-        if(clicks == 2) {
-            board.addDestination(mouseX, mouseY);
-            clicks = 0;
-            GameHistory.cleanUp();
-        }
-
         board.update();
 
         repaint();
     }
 
+    //paint the board
     public void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         board.paintComponent(g2d); //the board paints itself, pieces paint themselves in the board
@@ -65,7 +57,7 @@ public class GamePanel extends JPanel implements MouseListener {
         mouseY = e.getY();
     }
 
-    //event listeners. Mouse pressed seems to be more accurate than mouseClicked for some reason
+    //event listener. Mouse pressed seems to be more accurate than mouseClicked for some reason
     public void mousePressed(MouseEvent e) {
         setMousePosition(e);
         clicks++;
@@ -73,10 +65,17 @@ public class GamePanel extends JPanel implements MouseListener {
         if(clicks > 2)
             clicks = 0;
 
-        System.out.println("CLICKS " + clicks);
+        if(clicks == 1) {
+            board.addSource(mouseX, mouseY);
+        }
+        if(clicks == 2) {
+            board.addDestination(mouseX, mouseY);
+            clicks = 0;
+        }
+
     }
 
-    //need these although I am not going to use them
+    //need these although they won't be used
     public void mouseClicked(MouseEvent e) { }
     public void mouseReleased(MouseEvent e) { }
     public void mouseEntered(MouseEvent e) { }
