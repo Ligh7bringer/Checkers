@@ -88,4 +88,9 @@ public class Piece {
 
         return (this.getGridPosition() == other.getGridPosition() && this.getType() == other.getType());
     }
+
+    @Override
+    public String toString() {
+        return this.type + " " + this.gridPosition.toString();
+    }
 }

@@ -4,9 +4,11 @@ import Model.Board;
 import Model.GridPosition;
 import Model.Piece;
 import Model.Type;
+import com.sun.deploy.security.ValidationState;
 import sun.awt.image.ImageWatched;
 
 import java.awt.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -25,20 +27,20 @@ public class MoveController {
         try {
             if (piece.getType() == Type.WHITE || piece.getType() == Type.WHITE_KING || piece.getType() == Type.BLACK_KING ) {
                 if (board.isTileOccupied(row, col) && ( board.isTileOccupied(row + 1, col - 1)
-                            && board.getPiece(row + 1, col - 1).getType() == getOppositeType(piece.getType())) && !board.isTileOccupied(row + 2, col - 2)) {
+                            && getOppositeType(piece.getType()).contains(board.getPiece(row + 1, col - 1).getType())) && !board.isTileOccupied(row + 2, col - 2)) {
                     jumps.add(new GridPosition(row + 2, col - 2));
                 }
                 if (board.isTileOccupied(row, col) && (board.isTileOccupied(row + 1, col + 1)
-                        && board.getPiece(row + 1, col + 1).getType() == getOppositeType(piece.getType())) && !board.isTileOccupied(row + 2, col + 2)) {
+                        && getOppositeType(piece.getType()).contains(board.getPiece(row + 1, col + 1).getType())) && !board.isTileOccupied(row + 2, col + 2)) {
                     jumps.add(new GridPosition(row + 2, col + 2));
                 }
             }
             if(piece.getType() == Type.BLACK || piece.getType() == Type.WHITE_KING || piece.getType() == Type.BLACK_KING) {
-                if (board.isTileOccupied(row, col) && (board.isTileOccupied(row - 1, col - 1) && board.getPiece(row - 1, col - 1).getType() == getOppositeType(piece.getType()))
+                if (board.isTileOccupied(row, col) && (board.isTileOccupied(row - 1, col - 1) && getOppositeType(piece.getType()).contains(board.getPiece(row - 1, col - 1).getType()))
                             && !board.isTileOccupied(row - 2, col - 2)) {
                     jumps.add(new GridPosition(row - 2, col - 2));
                 }
-                if(board.isTileOccupied(row, col) && (board.isTileOccupied(row - 1, col + 1) && board.getPiece(row - 1, col + 1).getType() == getOppositeType(piece.getType()))
+                if(board.isTileOccupied(row, col) && (board.isTileOccupied(row - 1, col + 1) && getOppositeType(piece.getType()).contains(board.getPiece(row - 1, col + 1).getType()))
                         && !board.isTileOccupied(row-2, col+2)) {
                     jumps.add(new GridPosition(row-2, col+2));
                 }
@@ -96,7 +98,6 @@ public class MoveController {
                 if(board.isTileOccupied(i, j) && (p.getType() == Board.getCurrentColour() || p.getType() == Board.getCurrentKing())) {
                     if(!getPossibleJumps(i, j).isEmpty()) {
                         System.out.println("This one can jump: " + i + ", " + j);
-                        //System.out.println("Current King: " + Board.getCurrentKing());
                         canJump.add(new GridPosition(i, j));
                     }
                 }
@@ -167,17 +168,27 @@ public class MoveController {
     }
 
     //returns the opposite type
-    private Type getOppositeType(Type t) {
-        if(t == Type.WHITE || t == Type.WHITE_KING) {
-            return Type.BLACK;
+    private ArrayList<Type> getOppositeType(Type t) {
+        ArrayList<Type> opposite = new ArrayList<>();
+        if(t == Type.WHITE) {
+            opposite.add(Type.BLACK);
+        } else if(t == Type.BLACK) {
+            opposite.add(Type.WHITE);
+        } else if(t == Type.WHITE_KING) {
+            opposite.add(Type.BLACK);
+            opposite.add(Type.BLACK_KING);
+        } else if(t == Type.BLACK_KING) {
+            opposite.add(Type.WHITE);
+            opposite.add(Type.WHITE);
         }
-
-        return Type.WHITE;
+        return opposite;
     }
 
     public static void replayGame(String name) {
-        board.replayGame(ReplayHandler.parseReplay(name));
-        Board.startTimer();
+        if(!ReplayHandler.parseReplay(name).isEmpty()) {
+            board.replayGame(ReplayHandler.parseReplay(name));
+            Board.startTimer();
+        }
     }
 
 }

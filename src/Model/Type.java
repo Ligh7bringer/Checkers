@@ -6,5 +6,5 @@ public enum Type {
         BLACK,
         WHITE_KING,
         BLACK_KING,
-        EMPTY //will this be used?
+        EMPTY
 }

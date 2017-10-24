@@ -15,9 +15,9 @@ import java.awt.event.ActionListener;
 public class InformationPanel extends JPanel {
     private JLabel currentPlayer;
     private JLabel info;
-    private JTextPane textPane;
+    private static JTextPane textPane;
     private JScrollPane scroll;
-    private JButton undoBtn, redoBtn, saveReplayBtn, loadReplayBtn;
+    private JButton undoBtn, redoBtn;
 
     public static final int WIDTH = 200;
     public static final int HEIGHT = Board.SIZE * Board.TILE_HEIGHT;
@@ -126,5 +126,9 @@ public class InformationPanel extends JPanel {
         } catch (Exception e) {
             System.out.println("nothing to remove");
         }
+    }
+
+    public static void clearMoves() {
+        textPane.setText("");
     }
 }

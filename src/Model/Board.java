@@ -1,7 +1,9 @@
 package Model;
 
+import Controller.BoardController;
 import Controller.GameHistory;
 import Controller.MoveController;
+import UI.InformationPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,16 +27,27 @@ public class Board {
     private Piece[][] pieces;
 
     //which player's turn is it
-    private static boolean playerOne = true;
+    private static boolean playerOne;
 
     //instance of move controller
     private MoveController moveController;
+    private BoardController boardController;
 
     //constructor for board
     public Board(){
         pieces = new Piece[SIZE][SIZE]; //create the array
-        initialiseBoard(); //call initialise to add pieces to the array
         moveController = new MoveController(this);
+        boardController = new BoardController(this);
+    }
+
+    public void startGame(GameType t) {
+        if(t == GameType.TWO_PLAYERS) {
+            InformationPanel.clearMoves();
+            GameHistory.clearAll();
+            pieces = new Piece[SIZE][SIZE];
+            initialiseBoard();
+            playerOne = true;
+        }
     }
 
     //this creates the starting layout of the board
@@ -82,8 +95,10 @@ public class Board {
                     && !moveController.getPossibleJumps(row, col).contains(new GridPosition(destRow, destCol))) {
                 System.out.println("You have to take a jump if you have one available!");
             } else if(moveController.getPossibleJumps(row, col).contains(new GridPosition(destRow, destCol))) { //jump
+                boolean isKing = getPiece(row, col).getType() == Type.WHITE_KING || getPiece(row, col).getType() == Type.BLACK_KING;
+                System.out.println(isKing);
                 movePiece(row, col, destRow, destCol);
-                GridPosition gp = removeEnemyAfterJump(row, col, destRow, destCol);
+                GridPosition gp = removeEnemyAfterJump(row, col, destRow, destCol, isKing);
                 GameHistory.cleanUp();
                 GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), gp); //save the move
                 if(!moveController.getPossibleJumps(destRow, destCol).isEmpty()) {
@@ -127,8 +142,8 @@ public class Board {
                 g2d.fillRect(x, y, TILE_WIDTH, TILE_HEIGHT);
 
                 //if there's a piece on that tile
-                if(getPiece(i, j) != null)
-                    getPiece(i, j).paintComponent(g2d, x, y); //draw it
+                if(pieces[i][j] != null)
+                    pieces[i][j].paintComponent(g2d, x, y); //draw it
 
                 //move right
                 x = x + TILE_WIDTH;
@@ -165,7 +180,7 @@ public class Board {
 
     //makes sure a player can only move their own pieces during their turn
     private boolean validatePlayer(int row, int col) {
-        if(getPiece(row, col) == null) {
+        if(getPiece(row, col).getType() == Type.EMPTY) {
             System.out.println("empty tile at" + sourceX + ", " + sourceY);
             return false;
         } else if((getPiece(row, col).getType() == Type.BLACK || getPiece(row, col).getType() == Type.BLACK_KING ) && playerOne) {
@@ -204,24 +219,25 @@ public class Board {
     }
 
     //calculates the position of a piece which needs to be removed after a jump and returns its coordinates
-    private GridPosition removeEnemyAfterJump(int row, int col, int destRow, int destCol) {
+    private GridPosition removeEnemyAfterJump(int row, int col, int destRow, int destCol, boolean isKing) {
         int rowDiff = destRow - row;
         int colDiff = destCol - col;
-        if(getCurrentPlayer() == 2) {
+        if(getCurrentPlayer() == 2 || isKing) {
             if(rowDiff > 0 && colDiff > 0) {
                 removePiece(row + 1, col + 1);
                 return new GridPosition(row + 1, col + 1);
             }
-            else if(rowDiff > 0 && colDiff < 0) {
+            if(rowDiff > 0 && colDiff < 0) {
                 removePiece(row + 1, col - 1);
                 return new GridPosition(row + 1, col - 1);
             }
-        } else if(getCurrentPlayer() == 1) {
+        }
+        if(getCurrentPlayer() == 1 || isKing) {
             if(rowDiff < 0 && colDiff > 0) {
                 removePiece(row - 1, col + 1);
                 return new GridPosition(row - 1, col + 1);
             }
-            else if(rowDiff < 0 && colDiff < 0) {
+            if(rowDiff < 0 && colDiff < 0) {
                 removePiece(row - 1, col - 1);
                 return new GridPosition(row - 1, col - 1);
             }
@@ -244,15 +260,16 @@ public class Board {
     //replay a game
     public void replayGame(LinkedList<GridPosition[]> replay) {
         timer = new Timer(500, e -> {
-            GridPosition[] gps = replay.removeFirst();
-            movePiece(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
-            if(gps[2] != null) {
-                removePiece(gps[2].getRow(), gps[2].getCol());
-                System.out.println(gps[2].toString());
-            }
-
-            if(replay.isEmpty())
+            if(!replay.isEmpty()) {
+                GridPosition[] gps = replay.removeFirst();
+                movePiece(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
+                if (gps[2] != null) {
+                    removePiece(gps[2].getRow(), gps[2].getCol());
+                    System.out.println(gps[2].toString());
+                }
+            } else {
                 timer.stop();
+            }
         });
     }
 

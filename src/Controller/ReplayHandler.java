@@ -3,20 +3,13 @@ package Controller;
 import Model.GridPosition;
 
 import java.io.*;
-import java.lang.reflect.Array;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedList;
 
 public class ReplayHandler {
-    private static Charset utf8 = StandardCharsets.UTF_8;
     private static FileWriter fw;
 
-    public static void saveReplay(String name) throws IOException {
+    public static void saveReplay(String name) {
         File file = new File("replays/" + name + ".txt");
         if(file.exists()) {
             try {
@@ -119,10 +112,11 @@ public class ReplayHandler {
         File folder = new File("replays/");
         File[] listOfFiles = folder.listFiles();
 
-        for (File f : listOfFiles) {
-            if (f.isFile()) {
-                names.add(f.getName());
-                System.out.println("File " + f.getName());
+        if (listOfFiles != null) {
+            for (File f : listOfFiles) {
+                if (f.isFile()) {
+                    names.add(f.getName());
+                }
             }
         }
 

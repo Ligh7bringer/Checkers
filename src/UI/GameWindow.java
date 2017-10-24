@@ -83,6 +83,7 @@ public class GameWindow extends JPanel {
 
 
     private static JMenuBar createMenuBar() {
+        MenuActionHandler actionHandler = new MenuActionHandler();
         Font f = new Font("Deja-Vu sans", Font.PLAIN, 14);
         UIManager.put("Menu.font", f);
         UIManager.put("MenuItem.font", f);
@@ -103,21 +104,22 @@ public class GameWindow extends JPanel {
         //a group of JMenuItems
         menuItem = new JMenuItem("New game vs. AI");
         menuItem.setMnemonic(KeyEvent.VK_P);
-        menuItem.addActionListener(new MenuActionHandler());
+        menuItem.addActionListener(actionHandler);
         menu.add(menuItem);
 
         menuItem = new JMenuItem("New game vs. another player");
         menuItem.setMnemonic(KeyEvent.VK_F);
-        menuItem.addActionListener(new MenuActionHandler());
+        menuItem.addActionListener(actionHandler);
         menu.add(menuItem);
 
         menuItem = new JMenuItem("New game AI vs. AI");
         menuItem.setMnemonic(KeyEvent.VK_F);
-        menuItem.addActionListener(new MenuActionHandler());
+        menuItem.addActionListener(actionHandler);
         menu.add(menuItem);
 
         menu.addSeparator();
         menuItem = new JMenuItem("Exit");
+        menuItem.addActionListener(actionHandler);
         menu.add(menuItem);
 
         //Build Replays menu in the menu bar.
@@ -127,11 +129,11 @@ public class GameWindow extends JPanel {
                 "Replays Menu");
 
         menuItem = new JMenuItem("Save replay");
-        menuItem.addActionListener(new MenuActionHandler());
+        menuItem.addActionListener(actionHandler);
         menu.add(menuItem);
 
         menuItem = new JMenuItem("Load replay");
-        menuItem.addActionListener(new MenuActionHandler());
+        menuItem.addActionListener(actionHandler);
         menu.add(menuItem);
 
         menuBar.add(menu);
@@ -143,7 +145,7 @@ public class GameWindow extends JPanel {
                 "Help Menu");
 
         menuItem = new JMenuItem("Rules");
-        menuItem.addActionListener(new MenuActionHandler());
+        menuItem.addActionListener(actionHandler);
         menu.add(menuItem);
 
         menuBar.add(menu);

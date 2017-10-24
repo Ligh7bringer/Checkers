@@ -35,18 +35,15 @@ public class GameHistory {
             currentIndex = 0;
     }
 
-    public static void incrementIndex() {
+    static void incrementIndex() {
         currentIndex++;
         if(currentIndex >= moves.size())
             currentIndex = moves.size() - 1;
     }
 
-    public static boolean canUndo() {
-        return canUndo;
-    }
-
-    public static void setCanUndo(boolean canUndo) {
-        GameHistory.canUndo = canUndo;
+    public static void clearAll() {
+        copy.clear();
+        moves.clear();
     }
 
     public static int getCurrentIndex() {
