@@ -175,8 +175,8 @@ public class MoveController {
         return Type.WHITE;
     }
 
-    public static void replayGame() {
-        board.replayGame(ReplayHandler.parseReplay());
+    public static void replayGame(String name) {
+        board.replayGame(ReplayHandler.parseReplay(name));
         Board.startTimer();
     }
 

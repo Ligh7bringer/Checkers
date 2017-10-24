@@ -16,8 +16,8 @@ public class ReplayHandler {
     private static Charset utf8 = StandardCharsets.UTF_8;
     private static FileWriter fw;
 
-    public static void saveReplay() {
-        File file = new File("replays/replay" + 1 + ".txt");
+    public static void saveReplay(String name) throws IOException {
+        File file = new File("replays/" + name + ".txt");
         if(file.exists()) {
             try {
                 fw = new FileWriter(file,true);
@@ -26,7 +26,8 @@ public class ReplayHandler {
             }
         } else {
             try {
-                file.createNewFile();
+                if(file.createNewFile())
+                    fw = new FileWriter(file, true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -66,14 +67,14 @@ public class ReplayHandler {
         }
     }
 
-    static LinkedList<GridPosition[]> parseReplay() {
+    static LinkedList<GridPosition[]> parseReplay(String name) {
         LinkedList<GridPosition[]> replay = new LinkedList<>();
 
         File file;
         FileReader fileReader;
         BufferedReader bufferedReader;
         try {
-            file = new File("replays/replay1.txt");
+            file = new File("replays/" + name);
             fileReader = new FileReader(file);
             bufferedReader = new BufferedReader(fileReader);
 
@@ -111,6 +112,21 @@ public class ReplayHandler {
         }
 
         return replay;
+    }
+
+    public static ArrayList<String> getAllReplayNames() {
+        ArrayList<String> names = new ArrayList<>();
+        File folder = new File("replays/");
+        File[] listOfFiles = folder.listFiles();
+
+        for (File f : listOfFiles) {
+            if (f.isFile()) {
+                names.add(f.getName());
+                System.out.println("File " + f.getName());
+            }
+        }
+
+        return names;
     }
 
 }

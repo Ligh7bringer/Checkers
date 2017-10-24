@@ -33,11 +33,11 @@ public class Piece {
     }
 
     //pieces should draw themselves
-    public void paintComponent(Graphics g, int x, int y) {
-        g.drawImage(image, x + 10, y + 10, null); //TODO:change this to calculate center of tile
+    void paintComponent(Graphics g, int x, int y) {
+        g.drawImage(image, x + 10, y + 10, null);
     }
 
-    public void update() {
+    void update() {
         crownPiece();
 
     }
@@ -67,11 +67,11 @@ public class Piece {
         return type;
     }
 
-    public void setGridPosition(GridPosition gp) {
+    void setGridPosition(GridPosition gp) {
         this.gridPosition = gp;
     }
 
-    public GridPosition getGridPosition() {
+    private GridPosition getGridPosition() {
         return gridPosition;
     }
 
@@ -85,10 +85,7 @@ public class Piece {
             return false;
         }
         final Piece other = (Piece) obj;
-        if ((this.getGridPosition() != other.getGridPosition() || this.getType() != other.getType())) {
-            return false;
-        }
 
-        return true;
+        return (this.getGridPosition() == other.getGridPosition() && this.getType() == other.getType());
     }
 }

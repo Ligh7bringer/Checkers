@@ -1,8 +1,6 @@
 package Controller;
 
 import UI.GameWindow;
-import UI.MainWindow;
-import UI.MenuPanel;
 
 import java.awt.*;
 import javax.swing.*;
@@ -14,12 +12,12 @@ public class MainGameLoop extends JPanel implements Runnable {
     private long targetTime = 1000 / targetFPS;
     private boolean isRunning = false;
 
-    private MenuPanel menuPanel;
+    private GameWindow gameWindow;
 
     //constructor
     private MainGameLoop() {
         //gameWindow = new GameWindow();
-        menuPanel = new MenuPanel();
+        gameWindow = new GameWindow();
         start(); //start main game loop
     }
 
@@ -65,7 +63,7 @@ public class MainGameLoop extends JPanel implements Runnable {
     //update, called every "frame"
     private void update() {
         //gameWindow.update();
-        menuPanel.update();
+        gameWindow.update();
     }
 
     // this will draw everything hopefully
@@ -75,7 +73,7 @@ public class MainGameLoop extends JPanel implements Runnable {
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
         //gameWindow.paintComponent(g2d);
-        menuPanel.paintComponent(g2d);
+        gameWindow.paintComponent(g2d);
 
         g2d.dispose(); //is this needed?
     }
