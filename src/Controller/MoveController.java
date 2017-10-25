@@ -89,13 +89,13 @@ public class MoveController {
     }
 
     //a player has to jump if they can so this will be needed later
-    public ArrayList<GridPosition> getAllJumps() {
+    public ArrayList<GridPosition> getAllJumps(Type t) {
         ArrayList<GridPosition> canJump = new ArrayList<>();
 
         for(int i = 0; i < Board.SIZE; i++) {
             for (int j = 0; j < Board.SIZE; j++) {
                 Piece p = board.getPiece(i, j);
-                if(board.isTileOccupied(i, j) && (p.getType() == Board.getCurrentColour() || p.getType() == Board.getCurrentKing())) {
+                if(board.isTileOccupied(i, j) && (p.getType() == t || p.getType() == Board.getCurrentKing())) {
                     if(!getPossibleJumps(i, j).isEmpty()) {
                         System.out.println("This one can jump: " + i + ", " + j);
                         canJump.add(new GridPosition(i, j));
@@ -182,13 +182,6 @@ public class MoveController {
             opposite.add(Type.WHITE);
         }
         return opposite;
-    }
-
-    public static void replayGame(String name) {
-        if(!ReplayHandler.parseReplay(name).isEmpty()) {
-            board.replayGame(ReplayHandler.parseReplay(name));
-            Board.startTimer();
-        }
     }
 
 }

@@ -14,11 +14,19 @@ public class MenuActionHandler implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(e.getActionCommand().equals("New game vs. another player")) {
-            int i = JOptionPane.showConfirmDialog(null, "Do you want to start a new game\n(any current game will be lost)?", "Message", JOptionPane.YES_NO_OPTION);
+        if(e.getActionCommand().equals("New game vs. AI")) {
+            int i = showConfirmDialog();
+            if(i == 0)
+                BoardController.setupGame(GameType.VS_AI);
+        } else if(e.getActionCommand().equals("New game vs. another player")) {
+            int i = showConfirmDialog();
             if(i == 0)
                 BoardController.setupGame(GameType.TWO_PLAYERS);
-        } else if(e.getActionCommand().equals("Save replay")) {
+        }  else if(e.getActionCommand().equals("New game AI vs. AI")) {
+            int i = showConfirmDialog();
+            if (i == 0)
+                BoardController.setupGame(GameType.AI_VS_AI);
+        }else if(e.getActionCommand().equals("Save replay")) {
             String s = JOptionPane.showInputDialog("Enter a name for the replay: ");
             if ((s != null) && (s.length() > 0)) {
                 ReplayHandler.saveReplay(s);
@@ -27,7 +35,7 @@ public class MenuActionHandler implements ActionListener {
             String s = showLoadDialog();
             if ((s != null) && (s.length() > 0)) {
                 BoardController.setupGame(GameType.TWO_PLAYERS);
-                MoveController.replayGame(s);
+                BoardController.replayGame(s);
             }
         } else if(e.getActionCommand().equals("Rules")) {
             try {
@@ -50,5 +58,9 @@ public class MenuActionHandler implements ActionListener {
                 null,
                 possibilities,
                 null);
+    }
+
+    private int showConfirmDialog() {
+        return JOptionPane.showConfirmDialog(null, "Do you want to start a new game\n(any current game will be lost)?", "Message", JOptionPane.YES_NO_OPTION);
     }
 }

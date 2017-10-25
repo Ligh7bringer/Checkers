@@ -1,20 +1,18 @@
 package UI;
 
+import Controller.BoardController;
 import Controller.GameHistory;
 import Controller.MoveController;
-import Controller.ReplayHandler;
 import Model.Board;
 import Model.GridPosition;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class InformationPanel extends JPanel {
     private JLabel currentPlayer;
-    private JLabel info;
+    private JLabel info, gameType;
     private static JTextPane textPane;
     private JScrollPane scroll;
     private JButton undoBtn, redoBtn;
@@ -34,6 +32,7 @@ public class InformationPanel extends JPanel {
 
         currentPlayer = new JLabel("Player 1");
         info = new JLabel("Moves:");
+        gameType = new JLabel("Game type: ");
         textPane = new JTextPane();
         textPane.setEditable(false);
         textPane.setText("");
@@ -63,19 +62,23 @@ public class InformationPanel extends JPanel {
         c.gridy = 0;
         c.weighty = 0.1;
         c.anchor = GridBagConstraints.NORTH;
-        add(currentPlayer, c);
+        add(gameType, c);
 
         c.gridy = 1;
+        c.anchor = GridBagConstraints.SOUTH;
+        add(currentPlayer, c);
+
+        c.gridy = 2;
         c.weighty = 1;
         c.anchor = GridBagConstraints.SOUTH;
         add(info, c);
 
-        c.gridy = 2;
+        c.gridy = 3;
         c.anchor = GridBagConstraints.NORTH;
         c.weighty = 1;
         add(scroll, c);
 
-        c.gridy = 3;
+        c.gridy = 4;
         c.anchor = GridBagConstraints.NORTHWEST;
         c.weighty = 1;
         add(undoBtn, c);
@@ -86,6 +89,7 @@ public class InformationPanel extends JPanel {
 
     public void update() {
         currentPlayer.setText("It's player " + Board.getCurrentPlayer() + "'s turn.");
+        gameType.setText("Game type: " + BoardController.getGameType());
 
         if(!GameHistory.getCopy().isEmpty()) {
             updateMoveHistory();

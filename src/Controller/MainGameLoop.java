@@ -3,6 +3,7 @@ package Controller;
 import UI.GameWindow;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import javax.swing.*;
 
 public class MainGameLoop extends JPanel implements Runnable {
@@ -11,6 +12,7 @@ public class MainGameLoop extends JPanel implements Runnable {
     private int targetFPS = 30;
     private long targetTime = 1000 / targetFPS;
     private boolean isRunning = false;
+    private static boolean isPaused = false;
 
     private GameWindow gameWindow;
 
@@ -27,7 +29,9 @@ public class MainGameLoop extends JPanel implements Runnable {
         while(isRunning) {
             startTime = System.currentTimeMillis();
 
-            update();
+            if(!isPaused)
+                update();
+
             repaint();
 
             deltaTime = System.currentTimeMillis() - startTime;
@@ -64,6 +68,12 @@ public class MainGameLoop extends JPanel implements Runnable {
     private void update() {
         //gameWindow.update();
         gameWindow.update();
+    }
+
+    public static void pause() {
+        Timer t = new Timer(250, (ActionEvent e) -> isPaused = true);
+        t.start();
+        isPaused = false;
     }
 
     // this will draw everything hopefully

@@ -71,7 +71,7 @@ public class Piece {
         this.gridPosition = gp;
     }
 
-    private GridPosition getGridPosition() {
+    public GridPosition getGridPosition() {
         return gridPosition;
     }
 

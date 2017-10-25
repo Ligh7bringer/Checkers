@@ -19,7 +19,7 @@ public class Board {
 
     //position of tile which was clicked
     private GridPosition highlightedTile;
-    private ArrayList<GridPosition> availableTiles;
+    private ArrayList<GridPosition> availableTiles = new ArrayList<>();
 
     private int sourceX, sourceY, destX, destY;
 
@@ -33,20 +33,54 @@ public class Board {
     private MoveController moveController;
     private BoardController boardController;
 
+    private GameType gameType;
+    private AI ai;
+
+    private Timer aiTimer;
+
     //constructor for board
     public Board(){
         pieces = new Piece[SIZE][SIZE]; //create the array
         moveController = new MoveController(this);
         boardController = new BoardController(this);
+        ai = new AI(this, moveController);
+
     }
 
     public void startGame(GameType t) {
-        if(t == GameType.TWO_PLAYERS) {
-            InformationPanel.clearMoves();
-            GameHistory.clearAll();
-            pieces = new Piece[SIZE][SIZE];
-            initialiseBoard();
-            playerOne = true;
+        if(timer != null && timer.isRunning())
+            timer.stop();
+        if(aiTimer != null && aiTimer.isRunning())
+            aiTimer.stop();
+
+        playerOne = true;
+        gameType = t;
+        InformationPanel.clearMoves();
+        GameHistory.clearAll();
+        pieces = new Piece[SIZE][SIZE];
+        initialiseBoard();
+    }
+
+    public void setupAiGame() {
+        startGame(GameType.AI_VS_AI);
+        aiTimer = new Timer(800, e -> {
+            makeMove();
+        });
+    }
+
+    public void startAiTimer() {
+        aiTimer.start();
+    }
+
+    private void makeMove() {
+        if (gameType == GameType.AI_VS_AI) {
+            GridPosition[] gps = ai.getMove(getCurrentColour());
+            if(gps != null)
+                validateMove(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
+            else
+                System.out.println("wtf");
+            if(isWinner())
+                aiTimer.stop();
         }
     }
 
@@ -91,7 +125,7 @@ public class Board {
     private void validateMove(int row, int col, int destRow, int destCol) {
         if(validatePlayer(row, col)) { //make sure the player is trying to move their own piece
             //force the player to jump if they can
-            if((!moveController.getAllJumps().isEmpty() && !moveController.getAllJumps().contains(new GridPosition(row, col))) || (!moveController.getPossibleJumps(row, col).isEmpty())
+            if((!moveController.getAllJumps(getCurrentColour()).isEmpty() && !moveController.getAllJumps(getCurrentColour()).contains(new GridPosition(row, col))) || (!moveController.getPossibleJumps(row, col).isEmpty())
                     && !moveController.getPossibleJumps(row, col).contains(new GridPosition(destRow, destCol))) {
                 System.out.println("You have to take a jump if you have one available!");
             } else if(moveController.getPossibleJumps(row, col).contains(new GridPosition(destRow, destCol))) { //jump
@@ -118,7 +152,11 @@ public class Board {
             System.out.println("Invalid piece!");
         }
 
-        availableTiles.clear();
+        if(isWinner())
+            System.out.println("game over!");
+
+        if(!availableTiles.isEmpty())
+            availableTiles.clear();
         highlightedTile = null;
     }
 
@@ -176,6 +214,14 @@ public class Board {
                     pieces[i][j].update();
             }
         }
+
+        if (gameType == GameType.VS_AI && !playerOne) {
+            GridPosition[] gps = ai.getMove(Type.WHITE);
+            validateMove(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
+            switchPlayer();
+        }
+
+
     }
 
     //makes sure a player can only move their own pieces during their turn
@@ -324,5 +370,17 @@ public class Board {
             return Type.BLACK_KING;
         else
             return Type.WHITE_KING;
+    }
+
+    private boolean isWinner() {
+        int count = 0;
+        for(Piece[] row : pieces) {
+            for(Piece p : row) {
+                if(p != null && (p.getType() == getCurrentColour() || p.getType() == getCurrentKing()))
+                    count++;
+            }
+        }
+
+        return count == 0;
     }
 }
