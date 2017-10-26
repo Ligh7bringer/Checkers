@@ -8,7 +8,6 @@ public class GameHistory {
     private static LinkedList<GridPosition[]> moves = new LinkedList<>();
     private static LinkedList<GridPosition[]> copy = new LinkedList<>();
     private static int currentIndex;
-    private static boolean canUndo = true;
 
     public static void recordMove(GridPosition source, GridPosition dest, GridPosition removedPiece) {
         GridPosition[] gps = new GridPosition[3];
@@ -26,7 +25,7 @@ public class GameHistory {
                 moves.removeLast();
             }
         }
-        System.out.println("SIZE: " + moves.size() + "; INDEX: " + currentIndex);
+        //System.out.println("SIZE: " + moves.size() + "; INDEX: " + currentIndex);
     }
 
     static void decrementIndex() {

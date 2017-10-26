@@ -3,7 +3,6 @@ package Controller;
 import UI.GameWindow;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import javax.swing.*;
 
 public class MainGameLoop extends JPanel implements Runnable {
@@ -12,13 +11,11 @@ public class MainGameLoop extends JPanel implements Runnable {
     private int targetFPS = 30;
     private long targetTime = 1000 / targetFPS;
     private boolean isRunning = false;
-    private static boolean isPaused = false;
 
     private GameWindow gameWindow;
 
     //constructor
     private MainGameLoop() {
-        //gameWindow = new GameWindow();
         gameWindow = new GameWindow();
         start(); //start main game loop
     }
@@ -29,13 +26,12 @@ public class MainGameLoop extends JPanel implements Runnable {
         while(isRunning) {
             startTime = System.currentTimeMillis();
 
-            if(!isPaused)
-                update();
+            update();
 
             repaint();
 
             deltaTime = System.currentTimeMillis() - startTime;
-            wait = targetTime - deltaTime;
+            wait = (targetTime - deltaTime);
             if(wait < 5)
                 wait = 5;
             try {
@@ -43,6 +39,7 @@ public class MainGameLoop extends JPanel implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            //System.out.println("End of one loop iteration, wait = " + wait);
         }
         stop();
     }
@@ -66,14 +63,8 @@ public class MainGameLoop extends JPanel implements Runnable {
 
     //update, called every "frame"
     private void update() {
-        //gameWindow.update();
         gameWindow.update();
-    }
-
-    public static void pause() {
-        Timer t = new Timer(250, (ActionEvent e) -> isPaused = true);
-        t.start();
-        isPaused = false;
+        //System.out.println("updating");
     }
 
     // this will draw everything hopefully
@@ -82,10 +73,10 @@ public class MainGameLoop extends JPanel implements Runnable {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); //turn antialising on for nicer graphics
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
-        //gameWindow.paintComponent(g2d);
         gameWindow.paintComponent(g2d);
 
         g2d.dispose(); //is this needed?
+        System.out.println("repainting");
     }
 
     //main method

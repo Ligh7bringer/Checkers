@@ -3,6 +3,7 @@ package Model;
 import Controller.BoardController;
 import Controller.GameHistory;
 import Controller.MoveController;
+import Controller.TurnManager;
 import UI.InformationPanel;
 
 import javax.swing.*;
@@ -10,7 +11,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-//TODO: FIX THE SCREEN AND GRID COORDINATE MESS IN THIS CLASS!!!
 
 public class Board {
     public static final int SIZE = 8; //board width and height, i.e. number of tiles per row and column
@@ -25,9 +25,6 @@ public class Board {
 
     //store all the pieces here
     private Piece[][] pieces;
-
-    //which player's turn is it
-    private static boolean playerOne;
 
     //instance of move controller
     private MoveController moveController;
@@ -48,12 +45,12 @@ public class Board {
     }
 
     public void startGame(GameType t) {
+        TurnManager.reset();
         if(timer != null && timer.isRunning())
             timer.stop();
         if(aiTimer != null && aiTimer.isRunning())
             aiTimer.stop();
 
-        playerOne = true;
         gameType = t;
         InformationPanel.clearMoves();
         GameHistory.clearAll();
@@ -77,10 +74,14 @@ public class Board {
             GridPosition[] gps = ai.getMove(getCurrentColour());
             if(gps != null)
                 validateMove(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
-            else
-                System.out.println("wtf");
-            if(isWinner())
+            else {
+                System.out.println("Game over! no more moves!");
                 aiTimer.stop();
+            }
+            if(isWinner()) {
+                System.out.println("Game over! no more pieces!");
+                aiTimer.stop();
+            }
         }
     }
 
@@ -130,21 +131,22 @@ public class Board {
                 System.out.println("You have to take a jump if you have one available!");
             } else if(moveController.getPossibleJumps(row, col).contains(new GridPosition(destRow, destCol))) { //jump
                 boolean isKing = getPiece(row, col).getType() == Type.WHITE_KING || getPiece(row, col).getType() == Type.BLACK_KING;
-                System.out.println(isKing);
                 movePiece(row, col, destRow, destCol);
+                getPiece(destRow, destCol).crownPiece();
                 GridPosition gp = removeEnemyAfterJump(row, col, destRow, destCol, isKing);
                 GameHistory.cleanUp();
                 GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), gp); //save the move
                 if(!moveController.getPossibleJumps(destRow, destCol).isEmpty()) {
-                    switchPlayer();
+                    TurnManager.nextTurn();
                     System.out.println("Double jump!!!");
                 }
-                switchPlayer();
+                TurnManager.nextTurn();
             } else if (!moveController.getPossibleMoves(row, col).isEmpty() && moveController.getPossibleMoves(row, col).contains(new GridPosition(destRow, destCol))) { //regular move
                 movePiece(row, col, destRow, destCol);
+                getPiece(destRow, destCol).crownPiece();
                 GameHistory.cleanUp();
                 GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), null);
-                switchPlayer();
+                TurnManager.nextTurn();
             } else {
                 System.out.println("Illegal move!");
             }
@@ -208,30 +210,20 @@ public class Board {
 
     //simple update method which detects which ensures a piece is crowned
     public void update() {
-        for(int i = 0; i < SIZE; i++) {
-            for(int j = 0; j < SIZE; j++) {
-                if(pieces[i][j] != null)
-                    pieces[i][j].update();
-            }
-        }
-
-        if (gameType == GameType.VS_AI && !playerOne) {
+        if(gameType == GameType.VS_AI && getCurrentPlayer() == 2) {
             GridPosition[] gps = ai.getMove(Type.WHITE);
             validateMove(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
-            switchPlayer();
         }
-
-
     }
 
     //makes sure a player can only move their own pieces during their turn
     private boolean validatePlayer(int row, int col) {
         if(getPiece(row, col).getType() == Type.EMPTY) {
-            System.out.println("empty tile at" + sourceX + ", " + sourceY);
+            //System.out.println("empty tile at" + sourceX + ", " + sourceY);
             return false;
-        } else if((getPiece(row, col).getType() == Type.BLACK || getPiece(row, col).getType() == Type.BLACK_KING ) && playerOne) {
+        } else if((getPiece(row, col).getType() == Type.BLACK || getPiece(row, col).getType() == Type.BLACK_KING ) && getCurrentPlayer() == 1) {
             return true;
-        } else if((getPiece(row, col).getType() == Type.WHITE || getPiece(row, col).getType() == Type.WHITE_KING )&& !playerOne) {
+        } else if((getPiece(row, col).getType() == Type.WHITE || getPiece(row, col).getType() == Type.WHITE_KING )&& getCurrentPlayer() == 2) {
             return true;
         }
 
@@ -247,11 +239,6 @@ public class Board {
         } catch (NullPointerException e) {
             System.out.println("Nothing to undo");
         }
-    }
-
-    //this will be used to indicate it's the next player's turn
-    public void switchPlayer() {
-        playerOne = !playerOne;
     }
 
     //convert window coordinates to position in grid
@@ -350,7 +337,7 @@ public class Board {
 
     //get the colour of the player whose turn it is
     public static Type getCurrentColour() {
-        if(playerOne)
+        if(getCurrentPlayer() == 1)
             return Type.BLACK;
         else
             return Type.WHITE;
@@ -358,15 +345,12 @@ public class Board {
 
     //return the player who is supposed to play now
     public static int getCurrentPlayer() {
-        if(playerOne)
-            return 1;
-        else
-            return 2;
+        return TurnManager.getCurrentPlayer();
     }
 
     //returns current player's king colour
     public static Type getCurrentKing() {
-        if(playerOne)
+        if(getCurrentPlayer() == 1)
             return Type.BLACK_KING;
         else
             return Type.WHITE_KING;

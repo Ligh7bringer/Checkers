@@ -50,10 +50,6 @@ public class ReplayHandler {
 
         try {
             fw.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
             fw.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -101,6 +97,7 @@ public class ReplayHandler {
             fileReader.close();
             bufferedReader.close();
         } catch (IOException e) {
+            System.out.println("This should never happen!");
             e.printStackTrace();
         }
 

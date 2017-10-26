@@ -16,8 +16,7 @@ public class BoardController {
         if(t == GameType.AI_VS_AI) {
             board.setupAiGame();
             board.startAiTimer();
-        }
-        else
+        } else
             board.startGame(t);
     }
 

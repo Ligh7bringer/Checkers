@@ -43,7 +43,7 @@ public class Piece {
     }
 
     //this method will change the piece type to black or white king
-    private void crownPiece() {
+    public void crownPiece() {
         if(this.type == Type.WHITE && this.getGridPosition().getRow() == 7) {
             this.type = Type.WHITE_KING;
             try {

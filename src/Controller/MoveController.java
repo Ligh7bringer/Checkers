@@ -128,7 +128,7 @@ public class MoveController {
             if(removedPiece != null)
                 board.getPieces()[removedPiece.getRow()][removedPiece.getCol()] = new Piece(Board.getCurrentColour(), removedPiece); //add the removed piece
 
-            board.switchPlayer(); //switch player
+            TurnManager.nextTurn(); //switch player
             return true;
         } else {
             System.out.println("No more moves!"); //debug
@@ -161,7 +161,7 @@ public class MoveController {
             else
                 GameHistory.recordMove(dest, source, null);
 
-            board.switchPlayer();
+            TurnManager.nextTurn();
         } else {
             System.out.println("No more moves");
         }
