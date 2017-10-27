@@ -4,6 +4,7 @@ import Controller.BoardController;
 import Controller.GameHistory;
 import Controller.MoveController;
 import Controller.TurnManager;
+import UI.GamePanel;
 import UI.InformationPanel;
 
 import javax.swing.*;
@@ -22,6 +23,7 @@ public class Board {
     private ArrayList<GridPosition> availableTiles = new ArrayList<>();
 
     private int sourceX, sourceY, destX, destY;
+    private boolean gameOver;
 
     //store all the pieces here
     private Piece[][] pieces;
@@ -41,10 +43,11 @@ public class Board {
         moveController = new MoveController(this);
         boardController = new BoardController(this);
         ai = new AI(this, moveController);
-
+        gameOver = false;
     }
 
     public void startGame(GameType t) {
+        gameOver = false;
         TurnManager.reset();
         if(timer != null && timer.isRunning())
             timer.stop();
@@ -71,16 +74,18 @@ public class Board {
 
     private void makeMove() {
         if (gameType == GameType.AI_VS_AI) {
-            GridPosition[] gps = ai.getMove(getCurrentColour());
+            GridPosition[] gps = ai.getMove(TurnManager.getCurrentColour());
             if(gps != null)
                 validateMove(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
             else {
-                System.out.println("Game over! no more moves!");
+                //System.out.println("Game over! no more moves!");
                 aiTimer.stop();
+                gameOver = true;
             }
             if(isWinner()) {
                 System.out.println("Game over! no more pieces!");
                 aiTimer.stop();
+                gameOver = true;
             }
         }
     }
@@ -126,9 +131,10 @@ public class Board {
     private void validateMove(int row, int col, int destRow, int destCol) {
         if(validatePlayer(row, col)) { //make sure the player is trying to move their own piece
             //force the player to jump if they can
-            if((!moveController.getAllJumps(getCurrentColour()).isEmpty() && !moveController.getAllJumps(getCurrentColour()).contains(new GridPosition(row, col))) || (!moveController.getPossibleJumps(row, col).isEmpty())
+            if((!moveController.getAllJumps(TurnManager.getCurrentColour()).isEmpty() && !moveController.getAllJumps(TurnManager.getCurrentColour()).contains(new GridPosition(row, col))) || (!moveController.getPossibleJumps(row, col).isEmpty())
                     && !moveController.getPossibleJumps(row, col).contains(new GridPosition(destRow, destCol))) {
                 System.out.println("You have to take a jump if you have one available!");
+                InformationPanel.setErrorText("You have to jump!");
             } else if(moveController.getPossibleJumps(row, col).contains(new GridPosition(destRow, destCol))) { //jump
                 boolean isKing = getPiece(row, col).getType() == Type.WHITE_KING || getPiece(row, col).getType() == Type.BLACK_KING;
                 movePiece(row, col, destRow, destCol);
@@ -137,29 +143,38 @@ public class Board {
                 GameHistory.cleanUp();
                 GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), gp); //save the move
                 if(!moveController.getPossibleJumps(destRow, destCol).isEmpty()) {
-                    TurnManager.nextTurn();
+                    InformationPanel.setErrorText("You may jump again!");
+                    //TurnManager.nextTurn();
                     System.out.println("Double jump!!!");
+                } else {
+                    TurnManager.nextTurn();
+                    InformationPanel.setErrorText("");
                 }
-                TurnManager.nextTurn();
             } else if (!moveController.getPossibleMoves(row, col).isEmpty() && moveController.getPossibleMoves(row, col).contains(new GridPosition(destRow, destCol))) { //regular move
                 movePiece(row, col, destRow, destCol);
                 getPiece(destRow, destCol).crownPiece();
                 GameHistory.cleanUp();
                 GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), null);
                 TurnManager.nextTurn();
+                InformationPanel.setErrorText("");
             } else {
+                InformationPanel.setErrorText("Illegal move!");
                 System.out.println("Illegal move!");
             }
         } else {
+            InformationPanel.setErrorText("Invalid piece!");
             System.out.println("Invalid piece!");
         }
 
-        if(isWinner())
+        if(isWinner()) {
             System.out.println("game over!");
+            gameOver = true;
+        }
 
         if(!availableTiles.isEmpty())
             availableTiles.clear();
         highlightedTile = null;
+
     }
 
     //the board should paint itself
@@ -206,11 +221,26 @@ public class Board {
             }
         }
 
+        //draw the game over message
+        if(gameOver) {
+            g2d.setFont(new Font("Arial", Font.PLAIN, 60));
+            String text = "Game over!";
+            FontMetrics fm = g2d.getFontMetrics();
+            int totalWidth = (fm.stringWidth(text) * 2) + 4;
+
+
+            int text_x = (TILE_WIDTH * SIZE - totalWidth) / 2;
+            int text_y = (TILE_HEIGHT * SIZE - fm.getHeight()) / 2;
+            text_x += (fm.stringWidth(text) + 2) / 2;
+            g2d.setColor(Color.WHITE);
+
+            g2d.drawString(text, text_x, text_y + ((fm.getDescent() + fm.getAscent()) / 2));
+        }
     }
 
     //simple update method which detects which ensures a piece is crowned
     public void update() {
-        if(gameType == GameType.VS_AI && getCurrentPlayer() == 2) {
+        if(gameType == GameType.VS_AI && TurnManager.getCurrentPlayer() == 2) {
             GridPosition[] gps = ai.getMove(Type.WHITE);
             validateMove(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
         }
@@ -221,9 +251,9 @@ public class Board {
         if(getPiece(row, col).getType() == Type.EMPTY) {
             //System.out.println("empty tile at" + sourceX + ", " + sourceY);
             return false;
-        } else if((getPiece(row, col).getType() == Type.BLACK || getPiece(row, col).getType() == Type.BLACK_KING ) && getCurrentPlayer() == 1) {
+        } else if((getPiece(row, col).getType() == Type.BLACK || getPiece(row, col).getType() == Type.BLACK_KING ) && TurnManager.getCurrentPlayer() == 1) {
             return true;
-        } else if((getPiece(row, col).getType() == Type.WHITE || getPiece(row, col).getType() == Type.WHITE_KING )&& getCurrentPlayer() == 2) {
+        } else if((getPiece(row, col).getType() == Type.WHITE || getPiece(row, col).getType() == Type.WHITE_KING )&& TurnManager.getCurrentPlayer() == 2) {
             return true;
         }
 
@@ -255,7 +285,7 @@ public class Board {
     private GridPosition removeEnemyAfterJump(int row, int col, int destRow, int destCol, boolean isKing) {
         int rowDiff = destRow - row;
         int colDiff = destCol - col;
-        if(getCurrentPlayer() == 2 || isKing) {
+        if(TurnManager.getCurrentPlayer() == 2 || isKing) {
             if(rowDiff > 0 && colDiff > 0) {
                 removePiece(row + 1, col + 1);
                 return new GridPosition(row + 1, col + 1);
@@ -265,7 +295,7 @@ public class Board {
                 return new GridPosition(row + 1, col - 1);
             }
         }
-        if(getCurrentPlayer() == 1 || isKing) {
+        if(TurnManager.getCurrentPlayer() == 1 || isKing) {
             if(rowDiff < 0 && colDiff > 0) {
                 removePiece(row - 1, col + 1);
                 return new GridPosition(row - 1, col + 1);
@@ -298,7 +328,7 @@ public class Board {
                 movePiece(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
                 if (gps[2] != null) {
                     removePiece(gps[2].getRow(), gps[2].getCol());
-                    System.out.println(gps[2].toString());
+                    //System.out.println(gps[2].toString());
                 }
             } else {
                 timer.stop();
@@ -335,32 +365,11 @@ public class Board {
         return pieces;
     }
 
-    //get the colour of the player whose turn it is
-    public static Type getCurrentColour() {
-        if(getCurrentPlayer() == 1)
-            return Type.BLACK;
-        else
-            return Type.WHITE;
-    }
-
-    //return the player who is supposed to play now
-    public static int getCurrentPlayer() {
-        return TurnManager.getCurrentPlayer();
-    }
-
-    //returns current player's king colour
-    public static Type getCurrentKing() {
-        if(getCurrentPlayer() == 1)
-            return Type.BLACK_KING;
-        else
-            return Type.WHITE_KING;
-    }
-
     private boolean isWinner() {
         int count = 0;
         for(Piece[] row : pieces) {
             for(Piece p : row) {
-                if(p != null && (p.getType() == getCurrentColour() || p.getType() == getCurrentKing()))
+                if(p != null && (p.getType() == TurnManager.getCurrentColour() || p.getType() == TurnManager.getCurrentKing()))
                     count++;
             }
         }

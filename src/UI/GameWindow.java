@@ -2,10 +2,14 @@ package UI;
 
 import Controller.MenuActionHandler;
 import Model.Board;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
 
 public class GameWindow extends JPanel {
     //window dimensions
@@ -48,6 +52,11 @@ public class GameWindow extends JPanel {
         //set properties of the frame
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setResizable(false);
+        try {
+            frame.setIconImage(ImageIO.read(new File("res/blackking.png")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         //layout
         GridBagLayout gridBag = new GridBagLayout();

@@ -95,9 +95,10 @@ public class MoveController {
         for(int i = 0; i < Board.SIZE; i++) {
             for (int j = 0; j < Board.SIZE; j++) {
                 Piece p = board.getPiece(i, j);
-                if(board.isTileOccupied(i, j) && (p.getType() == t || p.getType() == Board.getCurrentKing())) {
+                //System.out.println(Board.getCurrentKing());
+                if(board.getPieces()[i][j] != null && (p.getType() == t || p.getType() == TurnManager.getCurrentKing())) {
                     if(!getPossibleJumps(i, j).isEmpty()) {
-                        System.out.println("This one can jump: " + i + ", " + j);
+                        //System.out.println("This one can jump: " + i + ", " + j);
                         canJump.add(new GridPosition(i, j));
                     }
                 }
@@ -126,7 +127,7 @@ public class MoveController {
 
             board.movePiece(source.getRow(), source.getCol(), dest.getRow(), dest.getCol()); //undo
             if(removedPiece != null)
-                board.getPieces()[removedPiece.getRow()][removedPiece.getCol()] = new Piece(Board.getCurrentColour(), removedPiece); //add the removed piece
+                board.getPieces()[removedPiece.getRow()][removedPiece.getCol()] = new Piece(TurnManager.getCurrentColour(), removedPiece); //add the removed piece
 
             TurnManager.nextTurn(); //switch player
             return true;
@@ -179,8 +180,9 @@ public class MoveController {
             opposite.add(Type.BLACK_KING);
         } else if(t == Type.BLACK_KING) {
             opposite.add(Type.WHITE);
-            opposite.add(Type.WHITE);
+            opposite.add(Type.WHITE_KING);
         }
+
         return opposite;
     }
 

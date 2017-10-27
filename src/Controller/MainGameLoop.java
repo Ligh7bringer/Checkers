@@ -64,7 +64,6 @@ public class MainGameLoop extends JPanel implements Runnable {
     //update, called every "frame"
     private void update() {
         gameWindow.update();
-        //System.out.println("updating");
     }
 
     // this will draw everything hopefully
@@ -72,11 +71,11 @@ public class MainGameLoop extends JPanel implements Runnable {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); //turn antialising on for nicer graphics
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
 
         gameWindow.paintComponent(g2d);
 
         g2d.dispose(); //is this needed?
-        System.out.println("repainting");
     }
 
     //main method

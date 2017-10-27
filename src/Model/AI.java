@@ -43,7 +43,7 @@ public class AI {
 
             if(!canMove.isEmpty()) {
                 int index = r.nextInt(canMove.size());
-                System.out.println(index);
+                //System.out.println(index);
                 GridPosition[] move = new GridPosition[2];
                 move[0] = canMove.get(index);
                 index = r.nextInt(moveController.getPossibleMoves(move[0].getRow(), move[0].getCol()).size());
@@ -52,7 +52,7 @@ public class AI {
                 return move;
             }
 
-            System.out.println("something went wrong!");
+            System.out.println("no more moves!");
             return null;
         }
     }
