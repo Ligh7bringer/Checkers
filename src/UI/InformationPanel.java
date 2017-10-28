@@ -7,8 +7,6 @@ import Controller.TurnManager;
 import Model.Board;
 import Model.GridPosition;
 import Model.Move;
-import Model.Piece;
-
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
@@ -18,7 +16,7 @@ import java.awt.*;
 
 public class InformationPanel extends JPanel {
     private JLabel currentPlayer;
-    private JLabel info, gameType;
+    private JLabel info, gameType, blackCount, whiteCount;
     private static JLabel error;
     private static JTextPane textPane;
     private JScrollPane scroll;
@@ -29,6 +27,9 @@ public class InformationPanel extends JPanel {
 
 
     public InformationPanel() {
+        Font oldLabelFont = UIManager.getFont("Label.font");
+        UIManager.put("Label.font", oldLabelFont.deriveFont(Font.PLAIN, 15));
+
         Dimension size = getPreferredSize();
         size.width = WIDTH;
         size.height = HEIGHT;
@@ -38,14 +39,17 @@ public class InformationPanel extends JPanel {
         setBackground(Color.WHITE);
 
         currentPlayer = new JLabel("Player 1");
-        currentPlayer.setFont(currentPlayer.getFont().deriveFont(13.0f));
+        //currentPlayer.setFont(currentPlayer.getFont().deriveFont(13.0f));
         info = new JLabel("Moves:");
         error = new JLabel("");
-        error.setFont(currentPlayer.getFont().deriveFont(14.0f));
+        //error.setFont(currentPlayer.getFont().deriveFont(14.0f));
         error.setMinimumSize(new Dimension(0, 0));
         //error.setMaximumSize(new Dimension(20, 1));
-        error.setPreferredSize(new Dimension(100, 40));
+        error.setPreferredSize(new Dimension(120, 40));
         gameType = new JLabel("Game type: ");
+
+        blackCount = new JLabel("Black checkers: ");
+        whiteCount = new JLabel("<html><font color='gray'>White checkers: </font></html>");
 
         textPane = new JTextPane();
         textPane.setEditable(false);
@@ -56,7 +60,7 @@ public class InformationPanel extends JPanel {
         doc.setParagraphAttributes(0, doc.getLength(), center, false);
 
         scroll = new JScrollPane (textPane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.setPreferredSize(new Dimension(130, 200));
+        scroll.setPreferredSize(new Dimension(170, 200));
 
         undoBtn = new JButton("Undo");
         undoBtn.addActionListener(e -> {
@@ -84,7 +88,17 @@ public class InformationPanel extends JPanel {
 
         c.gridy = 1;
         c.anchor = GridBagConstraints.SOUTH;
+        c.weighty =1;
+        c.insets = new Insets(5, 5, 5, 5);
         add(currentPlayer, c);
+
+        c.gridy = 2;
+        c.weighty = 1;
+        c.anchor = GridBagConstraints.CENTER;
+        add(blackCount, c);
+
+        c.anchor = GridBagConstraints.NORTH;
+        add(whiteCount, c);
 
         c.gridy = 3;
         c.weighty = 1;
@@ -115,25 +129,23 @@ public class InformationPanel extends JPanel {
         currentPlayer.setText("<html>It's player <font color='gray'>" + TurnManager.getCurrentPlayer() + "'s </font> turn!</html>");
         gameType.setText("Game type: " + BoardController.getGameType());
 
+        updateCount();
+
         if(!GameHistory.getCopy().isEmpty()) {
             updateMoveHistory();
         }
     }
 
+    private void updateCount() {
+        int[] count = BoardController.getPieceCount();
+        blackCount.setText("Black checkers: " + count[0]);
+        whiteCount.setText("<html><font color='gray'>White checkers: " + count[1] + "</font></html>");
+    }
+
     private void updateMoveHistory() {
-        String text = "";
-        Move move;
-        move = GameHistory.getCopy().removeFirst();
+        Move move = GameHistory.getCopy().removeFirst();
 
-        if(TurnManager.getCurrentPlayer() == 1)
-            text += "\nBlack: ";
-        else
-            text += "\nWhite: ";
-
-        text+= move.getSource().getGridPosition().toString() + " -> ";
-        text += move.getDestination().getGridPosition().toString();
-
-        textPane.setText(textPane.getText() + text);
+        textPane.setText(textPane.getText() + "\n" + move.toString());
 
 //        JScrollBar vertical = scroll.getVerticalScrollBar();
 //        vertical.setValue( vertical.getMaximum() );

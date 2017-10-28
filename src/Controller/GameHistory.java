@@ -9,13 +9,13 @@ public class GameHistory {
     private static LinkedList<Move> moves = new LinkedList<>();
     private static LinkedList<Move> copy = new LinkedList<>();
     private static int currentIndex;
+    private static Move redoMove;
     //private static Piece source, dest;
 
     public static void recordMove(Move m) {
         moves.add(m);
         copy.add(m);
         currentIndex = moves.size() - 1;
-        //System.out.println(m.toString());
     }
 
      public static void cleanUp() {
@@ -26,6 +26,19 @@ public class GameHistory {
         }
         //System.out.println("SIZE: " + moves.size() + "; INDEX: " + currentIndex);
     }
+
+    //TODO IMPLEMENT THESE METHODS AS THE NEW UNDO/REDO SYSTEM
+    static Move getUndoMove() {
+        redoMove = moves.removeLast();
+        return redoMove;
+    }
+
+    static Move getRedoMove() {
+        Move temp = redoMove;
+        redoMove = null;
+        return temp;
+    }
+
 
     static void decrementIndex() {
         currentIndex--;

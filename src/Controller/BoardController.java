@@ -31,5 +31,9 @@ public class BoardController {
         return gameType;
     }
 
+    public static int[] getPieceCount() {
+        return board.getPieceCount();
+    }
+
 
 }

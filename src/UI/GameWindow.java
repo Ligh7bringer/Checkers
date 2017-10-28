@@ -93,7 +93,7 @@ public class GameWindow extends JPanel {
 
     private static JMenuBar createMenuBar() {
         MenuActionHandler actionHandler = new MenuActionHandler();
-        Font f = new Font("Deja-Vu sans", Font.PLAIN, 14);
+        Font f = new Font("Arial", Font.PLAIN, 14);
         UIManager.put("Menu.font", f);
         UIManager.put("MenuItem.font", f);
 
@@ -112,17 +112,14 @@ public class GameWindow extends JPanel {
 
         //a group of JMenuItems
         menuItem = new JMenuItem("New game vs. AI");
-        menuItem.setMnemonic(KeyEvent.VK_P);
         menuItem.addActionListener(actionHandler);
         menu.add(menuItem);
 
         menuItem = new JMenuItem("New game vs. another player");
-        menuItem.setMnemonic(KeyEvent.VK_F);
         menuItem.addActionListener(actionHandler);
         menu.add(menuItem);
 
         menuItem = new JMenuItem("New game AI vs. AI");
-        menuItem.setMnemonic(KeyEvent.VK_F);
         menuItem.addActionListener(actionHandler);
         menu.add(menuItem);
 
@@ -134,8 +131,7 @@ public class GameWindow extends JPanel {
         //Build Replays menu in the menu bar.
         menu = new JMenu("Replays");
         menu.setMnemonic(KeyEvent.VK_R);
-        menu.getAccessibleContext().setAccessibleDescription(
-                "Replays Menu");
+        menu.getAccessibleContext().setAccessibleDescription("Replays Menu");
 
         menuItem = new JMenuItem("Save replay");
         menuItem.addActionListener(actionHandler);

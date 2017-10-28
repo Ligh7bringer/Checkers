@@ -12,6 +12,7 @@ import java.util.LinkedList;
 public class ReplayHandler {
     private static FileWriter fw;
 
+    //saves the information in GameHistory about the current game in a .txt file
     public static void saveReplay(String name) {
         File file = new File("replays/" + name + ".txt");
         if(file.exists()) {
@@ -63,6 +64,7 @@ public class ReplayHandler {
         }
     }
 
+    //reads a replay file and stores the moves in a linked list
     static LinkedList<Move> parseReplay(String name) {
         LinkedList<Move> replay = new LinkedList<>();
 
@@ -103,7 +105,6 @@ public class ReplayHandler {
                 }
 
                 move = new Move(source, dest, removed);
-                //System.out.println(move.toString());
 
                 replay.add(move);
             }
@@ -115,12 +116,10 @@ public class ReplayHandler {
             e.printStackTrace();
         }
 
-        for(Move m : replay)
-            System.out.println(m.toString());
-
         return replay;
     }
 
+    //return the names of all files in the replay/ directory
     public static ArrayList<String> getAllReplayNames() {
         ArrayList<String> names = new ArrayList<>();
         File folder = new File("replays/");
@@ -137,6 +136,7 @@ public class ReplayHandler {
         return names;
     }
 
+    //converts a string to a proper Type.
     private static Type parseType(String s) {
         if(s.equals("WHITE"))
             return Type.WHITE;

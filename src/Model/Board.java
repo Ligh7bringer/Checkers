@@ -142,7 +142,6 @@ public class Board {
                 getPiece(destRow, destCol).crownPiece();
                 Type destType = getPiece(destRow, destCol).getType();
                 Piece removed = removeEnemyAfterJump(row, col, destRow, destCol, isKing);
-                System.out.println("REMOVED: " + removed.toString());
                 GameHistory.cleanUp();
                 GameHistory.recordMove(new Move(new Piece(sourceType, new GridPosition(row, col)), new Piece(destType, new GridPosition(destRow, destCol)), removed));
                 if(!moveController.getPossibleJumps(destRow, destCol).isEmpty()) {
@@ -158,7 +157,7 @@ public class Board {
                 movePiece(row, col, destRow, destCol);
                 getPiece(destRow, destCol).crownPiece();
                 Type destType = getPiece(destRow, destCol).getType();
-                //GameHistory.cleanUp();
+                GameHistory.cleanUp();
                 GameHistory.recordMove(new Move(new Piece(sourceType, new GridPosition(row, col)), new Piece(destType, new GridPosition(destRow, destCol)), null));
                 TurnManager.nextTurn();
                 InformationPanel.setErrorText("");
@@ -391,5 +390,20 @@ public class Board {
         }
 
         return count == 0;
+    }
+
+    public int[] getPieceCount() {
+        int black = 0;
+        int white = 0;
+        for(int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if(pieces[i][j] != null && (pieces[i][j].getType() == Type.BLACK_KING || pieces[i][j].getType() == Type.BLACK))
+                    black++;
+                else if(pieces[i][j] != null && (pieces[i][j].getType() == Type.WHITE_KING || pieces[i][j].getType() == Type.WHITE))
+                    white++;
+            }
+        }
+
+        return new int[]{black, white};
     }
 }

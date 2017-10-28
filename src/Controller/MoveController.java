@@ -117,17 +117,15 @@ public class MoveController {
             }
             GameHistory.decrementIndex(); //decrement current index
             //GameHistory.cleanUp();
-
-            Piece source = move.getSource(); //get source
-            Piece dest = move.getDestination(); //get destination
             Piece removedPiece = move.getRemoved(); //get removed piece if move was jump
+            Piece source = move.getSource();
 
-            System.out.println("undoing: " + source.toString() + " -> " + dest.toString());
+            GridPosition s = move.getSource().getGridPosition();
+            GridPosition d = move.getDestination().getGridPosition();
 
-            GridPosition s = source.getGridPosition();
-            GridPosition d = dest.getGridPosition();
-
-            board.movePiece(d.getRow(), d.getCol(), s.getRow(), s.getCol()); //undo
+            //board.movePiece(d.getRow(), d.getCol(), s.getRow(), s.getCol()); //undo
+            board.removePiece(d.getRow(), d.getCol());
+            board.addPiece(s, source.getType());
             if(removedPiece != null) {
                 GridPosition r = removedPiece.getGridPosition();
                 board.addPiece(r, removedPiece.getType()); //add the removed piece
@@ -162,11 +160,11 @@ public class MoveController {
             GridPosition d = dest.getGridPosition();
             board.validateMove(s.getRow(), s.getCol(), d.getRow(), d.getCol()); //redo
 
-            GameHistory.cleanUp();
-            if(removedPiece != null)
-                GameHistory.recordMove(new Move(dest, source, removedPiece));
-            else
-                GameHistory.recordMove(new Move(dest, source, null));
+            //GameHistory.cleanUp();
+//            if(removedPiece != null)
+//                GameHistory.recordMove(new Move(dest, source, removedPiece));
+//            else
+//                GameHistory.recordMove(new Move(dest, source, null));
 
             TurnManager.nextTurn();
         } else {

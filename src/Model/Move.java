@@ -26,6 +26,6 @@ public class Move {
 
     @Override
     public String toString() {
-        return source.toString() + " -> " + destination.toString();
+        return source.getType() + ": " + source.getGridPosition().toString() + " -> " + destination.getGridPosition().toString();
     }
 }
