@@ -1,6 +1,9 @@
 package Controller;
 
 import Model.GridPosition;
+import Model.Move;
+import Model.Piece;
+import Model.Type;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -27,16 +30,20 @@ public class ReplayHandler {
         }
 
         if(!GameHistory.getMoves().isEmpty()) {
-            for (GridPosition[] gps : GameHistory.getMoves()) {
-                GridPosition source = gps[0];
-                GridPosition dest = gps[1];
-                GridPosition removedPiece = gps[2];
+            Piece source, dest, removedPiece;
+            String text;
+            for (Move move : GameHistory.getMoves()) {
+                source = move.getSource();
+                dest = move.getDestination();
+                removedPiece = move.getRemoved();
 
-                String text;
-                if (removedPiece != null)
-                    text = source.toString() + ";" + dest.toString() + ";" + removedPiece.toString();
-                else
-                    text = source.toString() + ";" + dest.toString();
+                //System.out.println(source.toString() + dest.toString());
+
+               if (removedPiece != null) {
+                   text = source.toString() + ";" + dest.toString() + ";" + removedPiece.toString();
+               } else {
+                   text = source.toString() + ";" + dest.toString();
+               }
 
                 try {
                     fw.write(text);
@@ -56,8 +63,8 @@ public class ReplayHandler {
         }
     }
 
-    static LinkedList<GridPosition[]> parseReplay(String name) {
-        LinkedList<GridPosition[]> replay = new LinkedList<>();
+    static LinkedList<Move> parseReplay(String name) {
+        LinkedList<Move> replay = new LinkedList<>();
 
         File file;
         FileReader fileReader;
@@ -67,31 +74,38 @@ public class ReplayHandler {
             fileReader = new FileReader(file);
             bufferedReader = new BufferedReader(fileReader);
 
+            Move move;
             String line;
             String[] positions;
+            String type;
             String row;
             String col;
-            GridPosition[] gps;
+            Piece source, dest, removed;
 
             while ((line = bufferedReader.readLine()) != null) {
-                gps =  new GridPosition[3];
                 positions = line.split(";");
-                row = positions[0].split(", ")[0];
-                col = positions[0].split(", ")[1];
-                gps[0] = new GridPosition(Integer.parseInt(row), Integer.parseInt(col));
+                type = positions[0].split(", ")[0];
+                row = positions[0].split(", ")[1];
+                col = positions[0].split(", ")[2];
+                source = new Piece(parseType(type), new GridPosition(Integer.parseInt(row), Integer.parseInt(col)));
 
-                row = positions[1].split(", ")[0];
-                col = positions[1].split(", ")[1];
-                gps[1] = new GridPosition(Integer.parseInt(row), Integer.parseInt(col));
+                type = positions[1].split(", ")[0];
+                row = positions[1].split(", ")[1];
+                col = positions[1].split(", ")[2];
+                dest = new Piece(parseType(type), new GridPosition(Integer.parseInt(row), Integer.parseInt(col)));
 
-                gps[2] = null;
+                removed = null;
                 if(positions.length >= 3) {
-                    row = positions[2].split(", ")[0];
-                    col = positions[2].split(", ")[1];
-                    gps[2] = new GridPosition(Integer.parseInt(row), Integer.parseInt(col));
+                    type = positions[2].split(", ")[0];
+                    row = positions[2].split(", ")[1];
+                    col = positions[2].split(", ")[2];
+                    removed = new Piece(parseType(type), new GridPosition(Integer.parseInt(row), Integer.parseInt(col)));
                 }
 
-                replay.add(gps);
+                move = new Move(source, dest, removed);
+                //System.out.println(move.toString());
+
+                replay.add(move);
             }
 
             fileReader.close();
@@ -100,6 +114,9 @@ public class ReplayHandler {
             System.out.println("This should never happen!");
             e.printStackTrace();
         }
+
+        for(Move m : replay)
+            System.out.println(m.toString());
 
         return replay;
     }
@@ -118,6 +135,19 @@ public class ReplayHandler {
         }
 
         return names;
+    }
+
+    private static Type parseType(String s) {
+        if(s.equals("WHITE"))
+            return Type.WHITE;
+        if(s.equals("BLACK"))
+            return Type.BLACK;
+        if(s.equals("WHITE_KING"))
+            return Type.WHITE_KING;
+        if(s.equals("BLACK_KING"))
+            return Type.BLACK_KING;
+
+        return null;
     }
 
 }

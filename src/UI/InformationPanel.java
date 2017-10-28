@@ -6,6 +6,8 @@ import Controller.MoveController;
 import Controller.TurnManager;
 import Model.Board;
 import Model.GridPosition;
+import Model.Move;
+import Model.Piece;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -13,7 +15,6 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
-import java.util.zip.DeflaterInputStream;
 
 public class InformationPanel extends JPanel {
     private JLabel currentPlayer;
@@ -55,7 +56,7 @@ public class InformationPanel extends JPanel {
         doc.setParagraphAttributes(0, doc.getLength(), center, false);
 
         scroll = new JScrollPane (textPane, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.setPreferredSize(new Dimension(150, 200));
+        scroll.setPreferredSize(new Dimension(130, 200));
 
         undoBtn = new JButton("Undo");
         undoBtn.addActionListener(e -> {
@@ -121,20 +122,22 @@ public class InformationPanel extends JPanel {
 
     private void updateMoveHistory() {
         String text = "";
-        GridPosition[] gps;
-        gps = GameHistory.getCopy().removeFirst();
+        Move move;
+        move = GameHistory.getCopy().removeFirst();
 
         if(TurnManager.getCurrentPlayer() == 1)
             text += "\nBlack: ";
         else
             text += "\nWhite: ";
 
-        text+= gps[0].toString() + " -> ";
-        text += gps[1].toString();
+        text+= move.getSource().getGridPosition().toString() + " -> ";
+        text += move.getDestination().getGridPosition().toString();
 
         textPane.setText(textPane.getText() + text);
-        JScrollBar vertical = scroll.getVerticalScrollBar();
-        vertical.setValue( vertical.getMaximum() );
+
+//        JScrollBar vertical = scroll.getVerticalScrollBar();
+//        vertical.setValue( vertical.getMaximum() );
+        textPane.setCaretPosition(textPane.getDocument().getLength());
     }
 
     private void removeLastLine() {

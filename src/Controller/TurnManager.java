@@ -34,4 +34,12 @@ public class TurnManager {
             return Type.WHITE_KING;
     }
 
+    public static Type getNextColour() {
+        if(getCurrentPlayer() == 1) {
+            return Type.WHITE;
+        } else {
+            return Type.BLACK;
+        }
+    }
+
 }

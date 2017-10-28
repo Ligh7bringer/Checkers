@@ -1,0 +1,2 @@
+BLACK, 5, 2;BLACK, 4, 3
+WHITE, 2, 5;WHITE, 3, 4

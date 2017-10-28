@@ -4,9 +4,7 @@ import Controller.BoardController;
 import Controller.GameHistory;
 import Controller.MoveController;
 import Controller.TurnManager;
-import UI.GamePanel;
 import UI.InformationPanel;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -56,6 +54,7 @@ public class Board {
 
         gameType = t;
         InformationPanel.clearMoves();
+        InformationPanel.setErrorText("");
         GameHistory.clearAll();
         pieces = new Piece[SIZE][SIZE];
         initialiseBoard();
@@ -79,11 +78,12 @@ public class Board {
                 validateMove(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
             else {
                 //System.out.println("Game over! no more moves!");
+                InformationPanel.setErrorText(TurnManager.getNextColour() + " won!");
                 aiTimer.stop();
                 gameOver = true;
             }
             if(isWinner()) {
-                System.out.println("Game over! no more pieces!");
+                InformationPanel.setErrorText(TurnManager.getNextColour() + " won!");
                 aiTimer.stop();
                 gameOver = true;
             }
@@ -128,7 +128,7 @@ public class Board {
 
     //the board has its own validateMove
     //parameters: source x, source y, destination x, destination y
-    private void validateMove(int row, int col, int destRow, int destCol) {
+    public void validateMove(int row, int col, int destRow, int destCol) {
         if(validatePlayer(row, col)) { //make sure the player is trying to move their own piece
             //force the player to jump if they can
             if((!moveController.getAllJumps(TurnManager.getCurrentColour()).isEmpty() && !moveController.getAllJumps(TurnManager.getCurrentColour()).contains(new GridPosition(row, col))) || (!moveController.getPossibleJumps(row, col).isEmpty())
@@ -137,11 +137,14 @@ public class Board {
                 InformationPanel.setErrorText("You have to jump!");
             } else if(moveController.getPossibleJumps(row, col).contains(new GridPosition(destRow, destCol))) { //jump
                 boolean isKing = getPiece(row, col).getType() == Type.WHITE_KING || getPiece(row, col).getType() == Type.BLACK_KING;
+                Type sourceType = getPiece(row, col).getType();
                 movePiece(row, col, destRow, destCol);
                 getPiece(destRow, destCol).crownPiece();
-                GridPosition gp = removeEnemyAfterJump(row, col, destRow, destCol, isKing);
+                Type destType = getPiece(destRow, destCol).getType();
+                Piece removed = removeEnemyAfterJump(row, col, destRow, destCol, isKing);
+                System.out.println("REMOVED: " + removed.toString());
                 GameHistory.cleanUp();
-                GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), gp); //save the move
+                GameHistory.recordMove(new Move(new Piece(sourceType, new GridPosition(row, col)), new Piece(destType, new GridPosition(destRow, destCol)), removed));
                 if(!moveController.getPossibleJumps(destRow, destCol).isEmpty()) {
                     InformationPanel.setErrorText("You may jump again!");
                     //TurnManager.nextTurn();
@@ -151,10 +154,12 @@ public class Board {
                     InformationPanel.setErrorText("");
                 }
             } else if (!moveController.getPossibleMoves(row, col).isEmpty() && moveController.getPossibleMoves(row, col).contains(new GridPosition(destRow, destCol))) { //regular move
+                Type sourceType = getPiece(row, col).getType();
                 movePiece(row, col, destRow, destCol);
                 getPiece(destRow, destCol).crownPiece();
-                GameHistory.cleanUp();
-                GameHistory.recordMove(new GridPosition(row, col), new GridPosition(destRow, destCol), null);
+                Type destType = getPiece(destRow, destCol).getType();
+                //GameHistory.cleanUp();
+                GameHistory.recordMove(new Move(new Piece(sourceType, new GridPosition(row, col)), new Piece(destType, new GridPosition(destRow, destCol)), null));
                 TurnManager.nextTurn();
                 InformationPanel.setErrorText("");
             } else {
@@ -179,6 +184,7 @@ public class Board {
 
     //the board should paint itself
     public void paintComponent(Graphics2D g2d) {
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
         //starting coordinates = top left corner of the window
         int x = 0;
         int y = 0;
@@ -231,8 +237,8 @@ public class Board {
 
             int text_x = (TILE_WIDTH * SIZE - totalWidth) / 2;
             int text_y = (TILE_HEIGHT * SIZE - fm.getHeight()) / 2;
-            text_x += (fm.stringWidth(text) + 2) / 2;
-            g2d.setColor(Color.WHITE);
+            text_x += (fm.stringWidth(text) + 6) / 2;
+            g2d.setColor(new Color(0, 149, 153));
 
             g2d.drawString(text, text_x, text_y + ((fm.getDescent() + fm.getAscent()) / 2));
         }
@@ -242,7 +248,10 @@ public class Board {
     public void update() {
         if(gameType == GameType.VS_AI && TurnManager.getCurrentPlayer() == 2) {
             GridPosition[] gps = ai.getMove(Type.WHITE);
-            validateMove(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
+            if(gps != null)
+                validateMove(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
+            else
+                gameOver = true;
         }
     }
 
@@ -253,7 +262,7 @@ public class Board {
             return false;
         } else if((getPiece(row, col).getType() == Type.BLACK || getPiece(row, col).getType() == Type.BLACK_KING ) && TurnManager.getCurrentPlayer() == 1) {
             return true;
-        } else if((getPiece(row, col).getType() == Type.WHITE || getPiece(row, col).getType() == Type.WHITE_KING )&& TurnManager.getCurrentPlayer() == 2) {
+        } else if((getPiece(row, col).getType() == Type.WHITE || getPiece(row, col).getType() == Type.WHITE_KING ) && TurnManager.getCurrentPlayer() == 2) {
             return true;
         }
 
@@ -282,31 +291,36 @@ public class Board {
     }
 
     //calculates the position of a piece which needs to be removed after a jump and returns its coordinates
-    private GridPosition removeEnemyAfterJump(int row, int col, int destRow, int destCol, boolean isKing) {
+    private Piece removeEnemyAfterJump(int row, int col, int destRow, int destCol, boolean isKing) {
+        Piece p;
         int rowDiff = destRow - row;
         int colDiff = destCol - col;
         if(TurnManager.getCurrentPlayer() == 2 || isKing) {
             if(rowDiff > 0 && colDiff > 0) {
+                p = getPiece(row+1, col+1);
                 removePiece(row + 1, col + 1);
-                return new GridPosition(row + 1, col + 1);
+                return p;
             }
             if(rowDiff > 0 && colDiff < 0) {
+                p = getPiece(row+1, col-1);
                 removePiece(row + 1, col - 1);
-                return new GridPosition(row + 1, col - 1);
+                return p;
             }
         }
         if(TurnManager.getCurrentPlayer() == 1 || isKing) {
             if(rowDiff < 0 && colDiff > 0) {
+                p = getPiece(row-1, col+1);
                 removePiece(row - 1, col + 1);
-                return new GridPosition(row - 1, col + 1);
+                return p;
             }
             if(rowDiff < 0 && colDiff < 0) {
+                p = getPiece(row-1, col-1);
                 removePiece(row - 1, col - 1);
-                return new GridPosition(row - 1, col - 1);
+                return p;
             }
         }
 
-        return new GridPosition(0, 0);
+        return new Piece(Type.EMPTY, new GridPosition(-1, -1));
     }
 
     //save the coordinates of the tile that needs to be highlighted
@@ -321,15 +335,13 @@ public class Board {
     }
 
     //replay a game
-    public void replayGame(LinkedList<GridPosition[]> replay) {
-        timer = new Timer(500, e -> {
+    public void replayGame(LinkedList<Move> replay) {
+        timer = new Timer(700, e -> {
             if(!replay.isEmpty()) {
-                GridPosition[] gps = replay.removeFirst();
-                movePiece(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
-                if (gps[2] != null) {
-                    removePiece(gps[2].getRow(), gps[2].getCol());
-                    //System.out.println(gps[2].toString());
-                }
+                Move m = replay.removeFirst();
+                GridPosition source = m.getSource().getGridPosition();
+                GridPosition dest = m.getDestination().getGridPosition();
+                validateMove(source.getRow(), source.getCol(), dest.getRow(), dest.getCol());
             } else {
                 timer.stop();
             }
@@ -363,6 +375,10 @@ public class Board {
     //returns the whole array of pieces
     public Piece[][] getPieces() {
         return pieces;
+    }
+
+    public void addPiece(GridPosition gp, Type t) {
+        pieces[gp.getRow()][gp.getCol()] = new Piece(t, gp);
     }
 
     private boolean isWinner() {

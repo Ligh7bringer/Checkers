@@ -1,25 +1,24 @@
 package Controller;
-
 import Model.GridPosition;
+import Model.Move;
+import Model.Piece;
 
 import java.util.LinkedList;
 
 public class GameHistory {
-    private static LinkedList<GridPosition[]> moves = new LinkedList<>();
-    private static LinkedList<GridPosition[]> copy = new LinkedList<>();
+    private static LinkedList<Move> moves = new LinkedList<>();
+    private static LinkedList<Move> copy = new LinkedList<>();
     private static int currentIndex;
+    //private static Piece source, dest;
 
-    public static void recordMove(GridPosition source, GridPosition dest, GridPosition removedPiece) {
-        GridPosition[] gps = new GridPosition[3];
-        gps[0] = source;
-        gps[1] = dest;
-        gps[2] = removedPiece;
-        moves.add(gps);
-        copy.add(gps);
+    public static void recordMove(Move m) {
+        moves.add(m);
+        copy.add(m);
         currentIndex = moves.size() - 1;
+        //System.out.println(m.toString());
     }
 
-    public static void cleanUp() {
+     public static void cleanUp() {
         if(moves.size() != 0) {
             while (moves.size() - currentIndex != 1) {
                 moves.removeLast();
@@ -49,11 +48,11 @@ public class GameHistory {
         return currentIndex;
     }
 
-    public static LinkedList<GridPosition[]> getMoves() {
+    public static LinkedList<Move> getMoves() {
         return moves;
     }
 
-    public static LinkedList<GridPosition[]> getCopy() {
+    public static LinkedList<Move> getCopy() {
         return copy;
     }
 }

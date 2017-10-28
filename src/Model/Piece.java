@@ -37,13 +37,8 @@ public class Piece {
         g.drawImage(image, x + 10, y + 10, null);
     }
 
-    void update() {
-        crownPiece();
-
-    }
-
     //this method will change the piece type to black or white king
-    public void crownPiece() {
+    public boolean crownPiece() {
         if(this.type == Type.WHITE && this.getGridPosition().getRow() == 7) {
             this.type = Type.WHITE_KING;
             try {
@@ -51,6 +46,7 @@ public class Piece {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            return true;
         }
         else if(this.type == Type.BLACK && this.getGridPosition().getRow() == 0) {
             this.type = Type.BLACK_KING;
@@ -59,7 +55,10 @@ public class Piece {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            return true;
         }
+
+        return false;
     }
 
     //returns the type of the piece
@@ -91,6 +90,6 @@ public class Piece {
 
     @Override
     public String toString() {
-        return this.type + " " + this.gridPosition.toString();
+        return this.type + ", " + this.gridPosition.toString();
     }
 }
