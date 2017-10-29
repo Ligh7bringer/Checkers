@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.*;
+import UI.InformationPanel;
 import com.sun.deploy.security.ValidationState;
 import sun.awt.image.ImageWatched;
 
@@ -107,22 +108,15 @@ public class MoveController {
 
     //undoes the last play
     public static boolean undoLastMove() {
-        Move move;
-        if(!GameHistory.getMoves().isEmpty() && GameHistory.getCurrentIndex() != 0 &&  BoardController.getGameType() != GameType.AI_VS_AI) {
-            try {
-                move = GameHistory.getMoves().get(GameHistory.getCurrentIndex()); //get the last move from game history
-            } catch (IndexOutOfBoundsException e) {
-                System.out.println("Nothing to undo!");
-                return false;
-            }
-            GameHistory.decrementIndex(); //decrement current index
-            //GameHistory.cleanUp();
+        Move move = GameHistory.getUndoMove();
+        if(move != null) {
             Piece removedPiece = move.getRemoved(); //get removed piece if move was jump
             Piece source = move.getSource();
 
             GridPosition s = move.getSource().getGridPosition();
             GridPosition d = move.getDestination().getGridPosition();
 
+            System.out.println("Undoing: " + d.toString() + " -> " + s.toString());
             //board.movePiece(d.getRow(), d.getCol(), s.getRow(), s.getCol()); //undo
             board.removePiece(d.getRow(), d.getCol());
             board.addPiece(s, source.getType());
@@ -140,19 +134,11 @@ public class MoveController {
     }
 
     public static void redoLastMove() {
-        Move move;
-        if(!GameHistory.getMoves().isEmpty() && GameHistory.getCurrentIndex() != GameHistory.getMoves().size()) {
-            try {
-                move = GameHistory.getMoves().get(GameHistory.getCurrentIndex() + 1); //get the last move from game history
-            } catch (IndexOutOfBoundsException e) {
-                System.out.println("Nothing to redo!");
-                return;
-            }
-            GameHistory.incrementIndex(); //increment current index
+        Move move = GameHistory.getRedoMove();
+        if(move != null) {
 
             Piece source = move.getSource(); //get source
             Piece dest = move.getDestination(); //get destination
-            Piece removedPiece = move.getRemoved(); //get removed piece if move was jump
 
             System.out.println("redoing: " + dest.toString() + " -> " + source.toString());
 
@@ -166,7 +152,6 @@ public class MoveController {
 //            else
 //                GameHistory.recordMove(new Move(dest, source, null));
 
-            TurnManager.nextTurn();
         } else {
             System.out.println("No more moves");
         }

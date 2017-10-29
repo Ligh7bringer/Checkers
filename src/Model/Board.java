@@ -1,17 +1,16 @@
 package Model;
 
-import Controller.BoardController;
-import Controller.GameHistory;
-import Controller.MoveController;
-import Controller.TurnManager;
+import Controller.*;
 import UI.InformationPanel;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 
-public class Board {
+public class Board implements ActionListener {
     public static final int SIZE = 8; //board width and height, i.e. number of tiles per row and column
     public static final int TILE_WIDTH = 80; // dimensions of tiles
     public static final int TILE_HEIGHT = 80;
@@ -45,6 +44,8 @@ public class Board {
     }
 
     public void startGame(GameType t) {
+        availableTiles.clear();
+        highlightedTile = null;
         gameOver = false;
         TurnManager.reset();
         if(timer != null && timer.isRunning())
@@ -62,32 +63,11 @@ public class Board {
 
     public void setupAiGame() {
         startGame(GameType.AI_VS_AI);
-        aiTimer = new Timer(800, e -> {
-            makeMove();
-        });
+        aiTimer = new Timer(800, this);
     }
 
     public void startAiTimer() {
         aiTimer.start();
-    }
-
-    private void makeMove() {
-        if (gameType == GameType.AI_VS_AI) {
-            GridPosition[] gps = ai.getMove(TurnManager.getCurrentColour());
-            if(gps != null)
-                validateMove(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
-            else {
-                //System.out.println("Game over! no more moves!");
-                InformationPanel.setErrorText(TurnManager.getNextColour() + " won!");
-                aiTimer.stop();
-                gameOver = true;
-            }
-            if(isWinner()) {
-                InformationPanel.setErrorText(TurnManager.getNextColour() + " won!");
-                aiTimer.stop();
-                gameOver = true;
-            }
-        }
     }
 
     //this creates the starting layout of the board
@@ -142,7 +122,7 @@ public class Board {
                 getPiece(destRow, destCol).crownPiece();
                 Type destType = getPiece(destRow, destCol).getType();
                 Piece removed = removeEnemyAfterJump(row, col, destRow, destCol, isKing);
-                GameHistory.cleanUp();
+                //GameHistory.cleanUp();
                 GameHistory.recordMove(new Move(new Piece(sourceType, new GridPosition(row, col)), new Piece(destType, new GridPosition(destRow, destCol)), removed));
                 if(!moveController.getPossibleJumps(destRow, destCol).isEmpty()) {
                     InformationPanel.setErrorText("You may jump again!");
@@ -157,7 +137,7 @@ public class Board {
                 movePiece(row, col, destRow, destCol);
                 getPiece(destRow, destCol).crownPiece();
                 Type destType = getPiece(destRow, destCol).getType();
-                GameHistory.cleanUp();
+                //GameHistory.cleanUp();
                 GameHistory.recordMove(new Move(new Piece(sourceType, new GridPosition(row, col)), new Piece(destType, new GridPosition(destRow, destCol)), null));
                 TurnManager.nextTurn();
                 InformationPanel.setErrorText("");
@@ -170,9 +150,15 @@ public class Board {
             System.out.println("Invalid piece!");
         }
 
-        if(isWinner()) {
+        if(isWinner() ) {
             System.out.println("game over!");
             gameOver = true;
+            if(gameType != GameType.REPLAY) {
+                String s = JOptionPane.showInputDialog("Save replay?");
+                if ((s != null) && (s.length() > 0)) {
+                    ReplayHandler.saveReplay(s);
+                }
+            }
         }
 
         if(!availableTiles.isEmpty())
@@ -233,7 +219,6 @@ public class Board {
             FontMetrics fm = g2d.getFontMetrics();
             int totalWidth = (fm.stringWidth(text) * 2) + 4;
 
-
             int text_x = (TILE_WIDTH * SIZE - totalWidth) / 2;
             int text_y = (TILE_HEIGHT * SIZE - fm.getHeight()) / 2;
             text_x += (fm.stringWidth(text) + 6) / 2;
@@ -243,7 +228,7 @@ public class Board {
         }
     }
 
-    //simple update method which detects which ensures a piece is crowned
+    //this is only used when playing vs AI and it's the AI's turn
     public void update() {
         if(gameType == GameType.VS_AI && TurnManager.getCurrentPlayer() == 2) {
             GridPosition[] gps = ai.getMove(Type.WHITE);
@@ -269,19 +254,15 @@ public class Board {
     }
 
     //moves piece from one tile to another
-    public void movePiece(int sourceX, int sourceY, int destX, int destY) {
+    private void movePiece(int sourceX, int sourceY, int destX, int destY) {
         pieces[destX][destY] = pieces[sourceX][sourceY]; //move to new position
         pieces[sourceX][sourceY] = null; //make old position null, it should be empty
-        try {
-            pieces[destX][destY].setGridPosition(new GridPosition(destX, destY));
-        } catch (NullPointerException e) {
-            System.out.println("Nothing to undo");
-        }
+        pieces[destX][destY].setGridPosition(new GridPosition(destX, destY));
     }
 
     //convert window coordinates to position in grid
     private int convertToGridCoords(int screenCoord) {
-        return screenCoord / TILE_WIDTH; //can be divided by tile height as well because they are the same, a tile is square
+        return screenCoord / TILE_WIDTH; //can be divided by tile height or tile width because they are the same, a tile is square
     }
 
     //removes piece at position gridX, gridY
@@ -334,17 +315,8 @@ public class Board {
     }
 
     //replay a game
-    public void replayGame(LinkedList<Move> replay) {
-        timer = new Timer(700, e -> {
-            if(!replay.isEmpty()) {
-                Move m = replay.removeFirst();
-                GridPosition source = m.getSource().getGridPosition();
-                GridPosition dest = m.getDestination().getGridPosition();
-                validateMove(source.getRow(), source.getCol(), dest.getRow(), dest.getCol());
-            } else {
-                timer.stop();
-            }
-        });
+    public void replayGame() {
+        timer = new Timer(700, this);
     }
 
     //All the getters one might possibly need:
@@ -405,5 +377,43 @@ public class Board {
         }
 
         return new int[]{black, white};
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if(e.getSource() == aiTimer) {
+            makeMove();
+        }
+        if(e.getSource() == timer) {
+            LinkedList<Move> replay = BoardController.getReplay();
+            if(!replay.isEmpty()) {
+                Move m = replay.removeFirst();
+                GridPosition source = m.getSource().getGridPosition();
+                GridPosition dest = m.getDestination().getGridPosition();
+                validateMove(source.getRow(), source.getCol(), dest.getRow(), dest.getCol());
+            } else {
+                timer.stop();
+            }
+        }
+    }
+
+    //get AI moves and validate them
+    private void makeMove() {
+        if (gameType == GameType.AI_VS_AI) {
+            GridPosition[] gps = ai.getMove(TurnManager.getCurrentColour());
+            if(gps != null)
+                validateMove(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
+            else {
+                //System.out.println("Game over! no more moves!");
+                InformationPanel.setErrorText(TurnManager.getNextColour() + " won!");
+                aiTimer.stop();
+                gameOver = true;
+            }
+            if(isWinner()) {
+                InformationPanel.setErrorText(TurnManager.getNextColour() + " won!");
+                aiTimer.stop();
+                gameOver = true;
+            }
+        }
     }
 }

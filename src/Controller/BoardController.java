@@ -2,10 +2,14 @@ package Controller;
 
 import Model.Board;
 import Model.GameType;
+import Model.Move;
+
+import java.util.LinkedList;
 
 public class BoardController {
     private static Board board;
     private static GameType gameType;
+    private static LinkedList<Move> replay;
 
     public BoardController(Board b) {
         board = b;
@@ -22,7 +26,8 @@ public class BoardController {
 
     public static void replayGame(String name) {
         if(!ReplayHandler.parseReplay(name).isEmpty()) {
-            board.replayGame(ReplayHandler.parseReplay(name));
+            replay = ReplayHandler.parseReplay(name);
+            board.replayGame();
             Board.startTimer();
         }
     }
@@ -35,5 +40,7 @@ public class BoardController {
         return board.getPieceCount();
     }
 
-
+    public static LinkedList<Move> getReplay() {
+        return replay;
+    }
 }

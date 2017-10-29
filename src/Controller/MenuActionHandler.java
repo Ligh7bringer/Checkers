@@ -34,7 +34,7 @@ public class MenuActionHandler implements ActionListener {
         } else if(e.getActionCommand().equals("Load replay")) {
             String s = showLoadDialog();
             if ((s != null) && (s.length() > 0)) {
-                BoardController.setupGame(GameType.TWO_PLAYERS);
+                BoardController.setupGame(GameType.REPLAY);
                 BoardController.replayGame(s);
             }
         } else if(e.getActionCommand().equals("Rules")) {
