@@ -1,28 +1,23 @@
 package Model;
 
+//this class defines a position on the board
 public class GridPosition {
-    private int row;
-    private int col;
+    private int row; //the row a piece is on
+    private int col; //the column a piece is on
 
+    //constructor
     public GridPosition(int row, int col) {
         this.row = row;
         this.col = col;
     }
 
-    public int getRow() {
-        return row;
-    }
-
-    public int getCol() {
-        return col;
-    }
-
+    //custom toString mainly used for debugging
     @Override
     public String toString() {
         return this.getRow() + ", " + getCol();
     }
 
-    //turns out equals needs to be overridden in order to be able to check if a list contains an object of this type
+    //custom equals method which is used when calling ArrayList.contains()
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -35,6 +30,15 @@ public class GridPosition {
         final GridPosition other = (GridPosition) obj;
 
         return (this.getRow() == other.getRow() && this.getCol() == other.getCol());
+    }
+
+    //getters
+    public int getRow() {
+        return row;
+    }
+
+    public int getCol() {
+        return col;
     }
 
 }

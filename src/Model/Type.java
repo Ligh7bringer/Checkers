@@ -1,6 +1,6 @@
 package Model;
 
-//enum so we know what kind of pieces we have
+//enum for the different checker types
 public enum Type {
         WHITE,
         BLACK,

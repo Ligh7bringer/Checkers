@@ -4,11 +4,11 @@ import Model.GridPosition;
 import Model.Move;
 import Model.Piece;
 import Model.Type;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+//this class handles everything replay related
 public class ReplayHandler {
     private static FileWriter fw;
 
@@ -37,8 +37,6 @@ public class ReplayHandler {
                 source = move.getSource();
                 dest = move.getDestination();
                 removedPiece = move.getRemoved();
-
-                //System.out.println(source.toString() + dest.toString());
 
                if (removedPiece != null) {
                    text = source.toString() + ";" + dest.toString() + ";" + removedPiece.toString();

@@ -2,7 +2,6 @@ package Controller;
 
 import Model.GameType;
 import UI.GameWindow;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,6 +9,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+//this class handles the events for the Menu bar
 public class MenuActionHandler implements ActionListener {
 
     @Override
@@ -48,6 +48,7 @@ public class MenuActionHandler implements ActionListener {
         }
     }
 
+    //displays the dialog for loading a replay
     private String showLoadDialog() {
         Object[] possibilities = ReplayHandler.getAllReplayNames().toArray();
         return (String)JOptionPane.showInputDialog(
@@ -60,6 +61,7 @@ public class MenuActionHandler implements ActionListener {
                 null);
     }
 
+    //displays a confirmation dialog
     private int showConfirmDialog() {
         return JOptionPane.showConfirmDialog(null, "Do you want to start a new game\n(any current game will be lost)?", "Message", JOptionPane.YES_NO_OPTION);
     }

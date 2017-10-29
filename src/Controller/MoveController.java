@@ -1,17 +1,10 @@
 package Controller;
 
 import Model.*;
-import UI.InformationPanel;
-import com.sun.deploy.security.ValidationState;
-import sun.awt.image.ImageWatched;
-
-import java.awt.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
+//this class handles most checker move logic
 public class MoveController {
-
     private static Board board;
 
     public MoveController(Board b) {
@@ -86,7 +79,7 @@ public class MoveController {
         return moves;
     }
 
-    //a player has to jump if they can so this will be needed later
+    //returns all pieces that can jump
     public ArrayList<GridPosition> getAllJumps(Type t) {
         ArrayList<GridPosition> canJump = new ArrayList<>();
 
@@ -123,6 +116,7 @@ public class MoveController {
             if(removedPiece != null) {
                 GridPosition r = removedPiece.getGridPosition();
                 board.addPiece(r, removedPiece.getType()); //add the removed piece
+                //TurnManager.nextTurn();
             }
 
             TurnManager.nextTurn(); //switch player
@@ -133,6 +127,7 @@ public class MoveController {
         }
     }
 
+    //redoes the last undone play
     public static void redoLastMove() {
         Move move = GameHistory.getRedoMove();
         if(move != null) {
@@ -145,19 +140,12 @@ public class MoveController {
             GridPosition s = source.getGridPosition();
             GridPosition d = dest.getGridPosition();
             board.validateMove(s.getRow(), s.getCol(), d.getRow(), d.getCol()); //redo
-
-            //GameHistory.cleanUp();
-//            if(removedPiece != null)
-//                GameHistory.recordMove(new Move(dest, source, removedPiece));
-//            else
-//                GameHistory.recordMove(new Move(dest, source, null));
-
         } else {
             System.out.println("No more moves");
         }
     }
 
-    //returns the opposite type
+    //returns the opposite type of Type t
     private ArrayList<Type> getOppositeType(Type t) {
         ArrayList<Type> opposite = new ArrayList<>();
         if(t == Type.WHITE) {

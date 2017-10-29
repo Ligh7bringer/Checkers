@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-
+//the board class handles everything to do with the board
 public class Board implements ActionListener {
     public static final int SIZE = 8; //board width and height, i.e. number of tiles per row and column
     public static final int TILE_WIDTH = 80; // dimensions of tiles
@@ -19,19 +19,23 @@ public class Board implements ActionListener {
     private GridPosition highlightedTile;
     private ArrayList<GridPosition> availableTiles = new ArrayList<>();
 
+    //coordinates of tiles which the player clicked
     private int sourceX, sourceY, destX, destY;
     private boolean gameOver;
 
     //store all the pieces here
     private Piece[][] pieces;
 
-    //instance of move controller
+    //instance of move controller and board controller
     private MoveController moveController;
     private BoardController boardController;
 
+    //store the game type
     private GameType gameType;
+    //instance of AI
     private AI ai;
 
+    //timer for AI vs. AI games
     private Timer aiTimer;
 
     //constructor for board
@@ -43,6 +47,7 @@ public class Board implements ActionListener {
         gameOver = false;
     }
 
+    //resets a game
     public void startGame(GameType t) {
         availableTiles.clear();
         highlightedTile = null;
@@ -61,17 +66,18 @@ public class Board implements ActionListener {
         initialiseBoard();
     }
 
+    //starts an AI vs AI game
     public void setupAiGame() {
         startGame(GameType.AI_VS_AI);
         aiTimer = new Timer(800, this);
     }
 
+    //starts the AI timer
     public void startAiTimer() {
         aiTimer.start();
     }
 
     //this creates the starting layout of the board
-    //is there a more efficient way to do this?
     private void initialiseBoard() {
         for(int row=0; row < (SIZE); row+=2){
             pieces[5][row] = new Piece(Type.BLACK, new GridPosition(5, row));
@@ -106,8 +112,7 @@ public class Board implements ActionListener {
         validateMove(sourceY, sourceX, destX, destY);
     }
 
-    //the board has its own validateMove
-    //parameters: source x, source y, destination x, destination y
+    //checks if a move from row, col to destRow, destCol is valid
     public void validateMove(int row, int col, int destRow, int destCol) {
         if(validatePlayer(row, col)) { //make sure the player is trying to move their own piece
             //force the player to jump if they can
@@ -122,7 +127,6 @@ public class Board implements ActionListener {
                 getPiece(destRow, destCol).crownPiece();
                 Type destType = getPiece(destRow, destCol).getType();
                 Piece removed = removeEnemyAfterJump(row, col, destRow, destCol, isKing);
-                //GameHistory.cleanUp();
                 GameHistory.recordMove(new Move(new Piece(sourceType, new GridPosition(row, col)), new Piece(destType, new GridPosition(destRow, destCol)), removed));
                 if(!moveController.getPossibleJumps(destRow, destCol).isEmpty()) {
                     InformationPanel.setErrorText("You may jump again!");
@@ -137,7 +141,6 @@ public class Board implements ActionListener {
                 movePiece(row, col, destRow, destCol);
                 getPiece(destRow, destCol).crownPiece();
                 Type destType = getPiece(destRow, destCol).getType();
-                //GameHistory.cleanUp();
                 GameHistory.recordMove(new Move(new Piece(sourceType, new GridPosition(row, col)), new Piece(destType, new GridPosition(destRow, destCol)), null));
                 TurnManager.nextTurn();
                 InformationPanel.setErrorText("");
@@ -150,8 +153,14 @@ public class Board implements ActionListener {
             System.out.println("Invalid piece!");
         }
 
-        if(isWinner() ) {
-            System.out.println("game over!");
+
+        if(!availableTiles.isEmpty())
+            availableTiles.clear();
+        highlightedTile = null;
+
+        if(isWinner() != 0) {
+            System.out.println("game over! player" + isWinner() + "won!");
+            InformationPanel.setErrorText("Player " + isWinner() + " (" + TurnManager.getNextColour() + ") won!");
             gameOver = true;
             if(gameType != GameType.REPLAY) {
                 String s = JOptionPane.showInputDialog("Save replay?");
@@ -161,13 +170,9 @@ public class Board implements ActionListener {
             }
         }
 
-        if(!availableTiles.isEmpty())
-            availableTiles.clear();
-        highlightedTile = null;
-
     }
 
-    //the board should paint itself
+    //paints the board and checkers
     public void paintComponent(Graphics2D g2d) {
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
         //starting coordinates = top left corner of the window
@@ -260,14 +265,14 @@ public class Board implements ActionListener {
         pieces[destX][destY].setGridPosition(new GridPosition(destX, destY));
     }
 
-    //convert window coordinates to position in grid
+    //converts window coordinates to position in grid
     private int convertToGridCoords(int screenCoord) {
         return screenCoord / TILE_WIDTH; //can be divided by tile height or tile width because they are the same, a tile is square
     }
 
-    //removes piece at position gridX, gridY
-    public void removePiece(int gridX, int gridY) {
-        pieces[gridX][gridY] = null;
+    //removes piece at position row, col on the grid
+    public void removePiece(int row, int col) {
+        pieces[row][col] = null;
     }
 
     //calculates the position of a piece which needs to be removed after a jump and returns its coordinates
@@ -314,7 +319,7 @@ public class Board implements ActionListener {
         timer.start();
     }
 
-    //replay a game
+    //replays a game
     public void replayGame() {
         timer = new Timer(700, this);
     }
@@ -348,22 +353,25 @@ public class Board implements ActionListener {
         return pieces;
     }
 
+    //adds a piece on the board at the given position of type t
     public void addPiece(GridPosition gp, Type t) {
         pieces[gp.getRow()][gp.getCol()] = new Piece(t, gp);
     }
 
-    private boolean isWinner() {
-        int count = 0;
-        for(Piece[] row : pieces) {
-            for(Piece p : row) {
-                if(p != null && (p.getType() == TurnManager.getCurrentColour() || p.getType() == TurnManager.getCurrentKing()))
-                    count++;
-            }
-        }
+    //checks if a player has lost all their checkers
+    //returns 2 if player 1 has 0 checkers
+    //returns 1 if player 2 has 0 checkers
+    //basically it returns the winner
+    private int isWinner() {
+        if(getPieceCount()[0] == 0)
+            return 2;
+        if(getPieceCount()[1] == 0)
+            return 1;
 
-        return count == 0;
+        return 0;
     }
 
+    //returns the count of black and white pieces
     public int[] getPieceCount() {
         int black = 0;
         int white = 0;
@@ -379,6 +387,7 @@ public class Board implements ActionListener {
         return new int[]{black, white};
     }
 
+    //action listener for the timers
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == aiTimer) {
@@ -397,7 +406,7 @@ public class Board implements ActionListener {
         }
     }
 
-    //get AI moves and validate them
+    //validates AI moves
     private void makeMove() {
         if (gameType == GameType.AI_VS_AI) {
             GridPosition[] gps = ai.getMove(TurnManager.getCurrentColour());
@@ -409,8 +418,8 @@ public class Board implements ActionListener {
                 aiTimer.stop();
                 gameOver = true;
             }
-            if(isWinner()) {
-                InformationPanel.setErrorText(TurnManager.getNextColour() + " won!");
+            if(isWinner() != 0) {
+                InformationPanel.setErrorText("Player " + isWinner() + " (" + TurnManager.getNextColour() + ") won!");
                 aiTimer.stop();
                 gameOver = true;
             }

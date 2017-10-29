@@ -11,17 +11,20 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 
+//this GUI class creates the main JFrame which displays the other JPanels
 public class GameWindow extends JPanel {
     //window dimensions
     private static final int WIDTH = Board.TILE_WIDTH * Board.SIZE + 1;
     private static final int HEIGHT = Board.TILE_HEIGHT * Board.SIZE;
 
+    //the main frame
     private static JFrame frame;
 
     //panels
     private InformationPanel informationPanel;
     private GamePanel gamePanel;
 
+    //constructor which initialises everything needed
     public GameWindow() {
         Dimension size = getPreferredSize();
         size.width = WIDTH;
@@ -35,15 +38,18 @@ public class GameWindow extends JPanel {
         makeGui();
     }
 
+    //update method which just calls the panels' update methods
     public void update() {
         gamePanel.update();
         informationPanel.update();
     }
 
+    //paint which calls gamePanel's paint
     public void paintComponent(Graphics2D g) {
         gamePanel.paintComponent(g);
     }
 
+    //initialises the GUI components
     private void makeGui() {
         JMenuBar menuBar = createMenuBar();
         menuBar.setPreferredSize(new Dimension(20, 40));
@@ -57,7 +63,6 @@ public class GameWindow extends JPanel {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         //layout
         GridBagLayout gridBag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
@@ -90,7 +95,7 @@ public class GameWindow extends JPanel {
         frame.getContentPane().setBackground(Color.WHITE); //this doesn't seem to change the background colour?
     }
 
-
+    //creates and returns the menu
     private static JMenuBar createMenuBar() {
         MenuActionHandler actionHandler = new MenuActionHandler();
         Font f = new Font("Arial", Font.PLAIN, 14);
@@ -100,6 +105,7 @@ public class GameWindow extends JPanel {
         JMenuBar menuBar;
         JMenu menu;
         JMenuItem menuItem;
+        ButtonGroup btnGroup;
 
         //Create the menu bar.
         menuBar = new JMenuBar();
@@ -128,7 +134,7 @@ public class GameWindow extends JPanel {
         menuItem.addActionListener(actionHandler);
         menu.add(menuItem);
 
-        //Build Replays menu in the menu bar.
+        //replays menu
         menu = new JMenu("Replays");
         menu.setMnemonic(KeyEvent.VK_R);
         menu.getAccessibleContext().setAccessibleDescription("Replays Menu");
@@ -140,14 +146,12 @@ public class GameWindow extends JPanel {
         menuItem = new JMenuItem("Load replay");
         menuItem.addActionListener(actionHandler);
         menu.add(menuItem);
-
         menuBar.add(menu);
 
         //help menu
         menu = new JMenu("Help");
         menu.setMnemonic(KeyEvent.VK_H);
-        menu.getAccessibleContext().setAccessibleDescription(
-                "Help Menu");
+        menu.getAccessibleContext().setAccessibleDescription("Help Menu");
 
         menuItem = new JMenuItem("Rules");
         menuItem.addActionListener(actionHandler);
@@ -157,6 +161,7 @@ public class GameWindow extends JPanel {
         return menuBar;
     }
 
+    //returns the frame
     public static JFrame getFrame() {
         return frame;
     }

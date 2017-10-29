@@ -6,13 +6,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+//this class defines a single piece on the board
 public class Piece {
     private Type type; //every piece needs to be either black or white
     private BufferedImage image; //image to be drawn
 
     private GridPosition gridPosition; //is this needed?
 
-    //constructor, takes the type of the piece
+    //constructor, takes the type of the piece and it's location
     public Piece(Type t, GridPosition gp) {
         this.type = t; //set the type
         //load the appropriate image
@@ -38,7 +39,7 @@ public class Piece {
     }
 
     //this method will change the piece type to black or white king
-    public boolean crownPiece() {
+    public void crownPiece() {
         if(this.type == Type.WHITE && this.getGridPosition().getRow() == 7) {
             this.type = Type.WHITE_KING;
             try {
@@ -46,7 +47,6 @@ public class Piece {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return true;
         }
         else if(this.type == Type.BLACK && this.getGridPosition().getRow() == 0) {
             this.type = Type.BLACK_KING;
@@ -55,10 +55,7 @@ public class Piece {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return true;
         }
-
-        return false;
     }
 
     //returns the type of the piece
@@ -66,15 +63,15 @@ public class Piece {
         return type;
     }
 
-    void setGridPosition(GridPosition gp) {
-        this.gridPosition = gp;
-    }
-
     public GridPosition getGridPosition() {
         return gridPosition;
     }
 
-    //same problem as GridPosition, need to have a custom equals method
+    void setGridPosition(GridPosition gp) {
+        this.gridPosition = gp;
+    }
+
+    //custom equals method which is called when using ArrayList.contains()
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -88,6 +85,7 @@ public class Piece {
         return (this.getGridPosition() == other.getGridPosition() && this.getType() == other.getType());
     }
 
+    //custom toString method mostly used for debugging
     @Override
     public String toString() {
         return this.type + ", " + this.gridPosition.toString();

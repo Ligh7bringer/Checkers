@@ -5,7 +5,6 @@ import Controller.GameHistory;
 import Controller.MoveController;
 import Controller.TurnManager;
 import Model.Board;
-import Model.GridPosition;
 import Model.Move;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -13,8 +12,12 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class InformationPanel extends JPanel {
+//this GUI class displays information about the current game
+public class InformationPanel extends JPanel implements ActionListener {
+    //GUI components
     private JLabel currentPlayer;
     private JLabel info, gameType, blackCount, whiteCount;
     private static JLabel error;
@@ -22,10 +25,11 @@ public class InformationPanel extends JPanel {
     private JScrollPane scroll;
     private JButton undoBtn, redoBtn;
 
-    public static final int WIDTH = 200;
-    public static final int HEIGHT = Board.SIZE * Board.TILE_HEIGHT;
+    //panel size
+    private static final int WIDTH = 200;
+    private static final int HEIGHT = Board.SIZE * Board.TILE_HEIGHT;
 
-
+    //the constructor initialises the panel
     public InformationPanel() {
         Font oldLabelFont = UIManager.getFont("Label.font");
         UIManager.put("Label.font", oldLabelFont.deriveFont(Font.PLAIN, 15));
@@ -38,6 +42,11 @@ public class InformationPanel extends JPanel {
         setBorder(BorderFactory.createTitledBorder("Game Stats:"));
         setBackground(Color.WHITE);
 
+        makeGUI();
+    }
+
+    //initialises all JComponents
+    private void makeGUI() {
         currentPlayer = new JLabel("Player 1");
         //currentPlayer.setFont(currentPlayer.getFont().deriveFont(13.0f));
         info = new JLabel("Moves:");
@@ -63,19 +72,10 @@ public class InformationPanel extends JPanel {
         scroll.setPreferredSize(new Dimension(170, 200));
 
         undoBtn = new JButton("Undo");
-        undoBtn.addActionListener(e -> {
-            if (undoBtn.isEnabled()) {
-                if(MoveController.undoLastMove())
-                    removeLastLine();
-            }
-        });
+        undoBtn.addActionListener(this);
 
         redoBtn = new JButton("Redo");
-        redoBtn.addActionListener(e -> {
-            if(undoBtn.isEnabled()) {
-                MoveController.redoLastMove();
-            }
-        });
+        redoBtn.addActionListener(this);
 
         setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
@@ -125,6 +125,7 @@ public class InformationPanel extends JPanel {
         add(error, c);
     }
 
+    //update method which updates the text of the JLabels and the move history text pane
     public void update() {
         currentPlayer.setText("<html>It's player <font color='gray'>" + TurnManager.getCurrentPlayer() + "'s </font> turn!</html>");
         gameType.setText("Game type: " + BoardController.getGameType());
@@ -136,22 +137,23 @@ public class InformationPanel extends JPanel {
         }
     }
 
+    //updates the piece count labels
     private void updateCount() {
         int[] count = BoardController.getPieceCount();
         blackCount.setText("Black checkers: " + count[0]);
         whiteCount.setText("<html><font color='gray'>White checkers: " + count[1] + "</font></html>");
     }
 
+    //updates the move history text pane with the last move
     private void updateMoveHistory() {
-        Move move = GameHistory.getCopy().removeFirst();
+        Move move = GameHistory.getCopy().removeFirst(); //get move
 
-        textPane.setText(textPane.getText() + "\n" + move.toString());
+        textPane.setText(textPane.getText() + "\n" + move.toString()); //set the text
 
-//        JScrollBar vertical = scroll.getVerticalScrollBar();
-//        vertical.setValue( vertical.getMaximum() );
-        textPane.setCaretPosition(textPane.getDocument().getLength());
+        textPane.setCaretPosition(textPane.getDocument().getLength()); //scroll to the very bottom
     }
 
+    //removes the last line of move history text pane. used when the undo button is clicked
     private void removeLastLine() {
         String content = null;
         try {
@@ -170,11 +172,25 @@ public class InformationPanel extends JPanel {
         }
     }
 
+    //sets the text of the error message label
     public static void setErrorText(String text) {
         error.setText("<html><font color='#536356'>" + text + "</font></html>");
     }
 
+    //clears all text from the move history text pane
     public static void clearMoves() {
         textPane.setText("");
+    }
+
+    //action listener for button presses
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if(e.getSource() == undoBtn) {
+            if(MoveController.undoLastMove())
+                removeLastLine();
+        }
+        if(e.getSource() == redoBtn) {
+            MoveController.redoLastMove();
+        }
     }
 }

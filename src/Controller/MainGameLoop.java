@@ -12,6 +12,7 @@ public class MainGameLoop extends JPanel implements Runnable {
     private long targetTime = 1000 / targetFPS;
     private boolean isRunning = false;
 
+    //game window instance
     private GameWindow gameWindow;
 
     //constructor

@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+//this GUI class displays the board in a JPanel and handles mouse events
 public class GamePanel extends JPanel implements MouseListener {
     //instance of board
     private Board board;
@@ -18,6 +19,7 @@ public class GamePanel extends JPanel implements MouseListener {
     //private boolean isClicked = false;
     private int clicks = 0;
 
+    //constructor which initialises all needed objects and variables
     public GamePanel() {
         board = new Board();
         Dimension size = getPreferredSize();
@@ -35,9 +37,10 @@ public class GamePanel extends JPanel implements MouseListener {
         setBackground(Color.WHITE);
     }
 
+    //update method which calls the board's update
     public void update() {
         board.update();
-        repaint();
+        repaint(); //repaint needs to be called to update the board
     }
 
     //paint the board
@@ -47,7 +50,7 @@ public class GamePanel extends JPanel implements MouseListener {
     }
 
 
-    //get mouse coords when event we are listening to occurs
+    //gets mouse coords when mouse position occurs
     private void setMousePosition(MouseEvent e) {
         mouseX = e.getX();
         mouseY = e.getY();
@@ -72,7 +75,7 @@ public class GamePanel extends JPanel implements MouseListener {
 
     }
 
-    //need these although they won't be used
+    //the rest of the mouse events that need to be implemented
     public void mouseClicked(MouseEvent e) { }
     public void mouseReleased(MouseEvent e) { }
     public void mouseEntered(MouseEvent e) { }

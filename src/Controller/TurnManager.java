@@ -1,15 +1,16 @@
 package Controller;
 
 import Model.Type;
-import UI.InformationPanel;
 
+//this class handles everything to do with turns
 public class TurnManager {
-    private static int numberOfTurns;
+    private static int numberOfTurns; //store the number of turns
 
     public static void nextTurn() {
         numberOfTurns++;
-    }
+    } //increment number of turns
 
+    //returns 1 if numberOfTurns is even, 2 if it's odd which is the current player
     public static int getCurrentPlayer() {
         return (numberOfTurns % 2) + 1;
     }
@@ -34,6 +35,7 @@ public class TurnManager {
             return Type.WHITE_KING;
     }
 
+    //returns the next player's colour
     public static Type getNextColour() {
         if(getCurrentPlayer() == 1) {
             return Type.WHITE;
