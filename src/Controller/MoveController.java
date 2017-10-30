@@ -146,7 +146,7 @@ public class MoveController {
     }
 
     //returns the opposite type of Type t
-    private ArrayList<Type> getOppositeType(Type t) {
+    private static ArrayList<Type> getOppositeType(Type t) {
         ArrayList<Type> opposite = new ArrayList<>();
         if(t == Type.WHITE) {
             opposite.add(Type.BLACK);

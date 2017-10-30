@@ -106,6 +106,7 @@ public class GameWindow extends JPanel {
         JMenu menu;
         JMenuItem menuItem;
         ButtonGroup btnGroup;
+        JRadioButtonMenuItem colour1, colour2, colour3;
 
         //Create the menu bar.
         menuBar = new JMenuBar();
@@ -146,6 +147,41 @@ public class GameWindow extends JPanel {
         menuItem = new JMenuItem("Load replay");
         menuItem.addActionListener(actionHandler);
         menu.add(menuItem);
+        menuBar.add(menu);
+
+        //settings menu
+        menu = new JMenu("Settings");
+        menu.setMnemonic(KeyEvent.VK_S);
+        menu.getAccessibleContext().setAccessibleDescription("Settings Menu");
+        btnGroup = new ButtonGroup();
+
+        menuItem = new JMenuItem("Preferred colour scheme:");
+        menu.add(menuItem);
+
+        colour1 = new JRadioButtonMenuItem("Black/White");
+        colour2 = new JRadioButtonMenuItem("Black/Red");
+        colour3 = new JRadioButtonMenuItem("Brown/White");
+        btnGroup.add(colour1);
+        btnGroup.add(colour2);
+        btnGroup.add(colour3);
+
+        colour1.setSelected(true);
+
+        menu.add(colour1);
+        menu.add(colour2);
+        menu.add(colour3);
+
+        colour1.addActionListener(actionHandler);
+        colour2.addActionListener(actionHandler);
+        colour3.addActionListener(actionHandler);
+
+        menu.addSeparator();
+
+        JCheckBoxMenuItem highlightMove = new JCheckBoxMenuItem("Show last move");
+        highlightMove.setState(true);
+        highlightMove.addActionListener(actionHandler);
+
+        menu.add(highlightMove);
         menuBar.add(menu);
 
         //help menu

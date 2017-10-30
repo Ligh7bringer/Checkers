@@ -1,6 +1,9 @@
 package UI;
 
+import Controller.BoardController;
 import Model.Board;
+import Model.GameType;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -65,7 +68,7 @@ public class GamePanel extends JPanel implements MouseListener {
         if (clicks > 2)
             clicks = 0;
 
-        if (clicks == 1) {
+        if (clicks == 1 ) {
             board.addSource(mouseX, mouseY);
         }
         if (clicks == 2) {

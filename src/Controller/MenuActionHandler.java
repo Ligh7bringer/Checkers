@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.GameType;
+import Model.Type;
 import UI.GameWindow;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -27,9 +28,13 @@ public class MenuActionHandler implements ActionListener {
             if (i == 0)
                 BoardController.setupGame(GameType.AI_VS_AI);
         }else if(e.getActionCommand().equals("Save replay")) {
-            String s = JOptionPane.showInputDialog("Enter a name for the replay: ");
-            if ((s != null) && (s.length() > 0)) {
-                ReplayHandler.saveReplay(s);
+            if(BoardController.getGameType() != null) {
+                String s = JOptionPane.showInputDialog("Enter a name for the replay: ");
+                if ((s != null) && (s.length() > 0)) {
+                    ReplayHandler.saveReplay(s);
+                }
+            } else {
+                JOptionPane.showMessageDialog(GameWindow.getFrame(), "Nothing to save! Play a game first!");
             }
         } else if(e.getActionCommand().equals("Load replay")) {
             String s = showLoadDialog();
@@ -45,6 +50,14 @@ public class MenuActionHandler implements ActionListener {
             }
         } else if(e.getActionCommand().equals("Exit")) {
             System.exit(0);
+        } else if(e.getActionCommand().equals("Black/White")) {
+            BoardController.setColours(1);
+        } else if(e.getActionCommand().equals("Black/Red")) {
+            BoardController.setColours(2);
+        } else if(e.getActionCommand().equals("Brown/White")) {
+            BoardController.setColours(3);
+        } else if(e.getActionCommand().equals("Show last move")) {
+            BoardController.setShowLastMove();
         }
     }
 

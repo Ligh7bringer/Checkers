@@ -38,6 +38,11 @@ public class Board implements ActionListener {
     //timer for AI vs. AI games
     private Timer aiTimer;
 
+    //colour scheme for the board
+    private Color colour1 = Color.BLACK, colour2 = Color.WHITE;
+
+    private boolean showLastMove = true;
+
     //constructor for board
     public Board(){
         pieces = new Piece[SIZE][SIZE]; //create the array
@@ -48,7 +53,8 @@ public class Board implements ActionListener {
     }
 
     //resets a game
-    public void startGame(GameType t) {
+    public void startGame(GameType t, int colourScheme) {
+        setColours(colourScheme);
         availableTiles.clear();
         highlightedTile = null;
         gameOver = false;
@@ -66,9 +72,24 @@ public class Board implements ActionListener {
         initialiseBoard();
     }
 
+    private void setColours(int colourScheme) {
+        if(colourScheme == 1) {
+            colour1 = Color.BLACK;
+            colour2 = Color.WHITE;
+        }
+        if(colourScheme == 2) {
+            colour1 = Color.BLACK;
+            colour2 = new Color(153, 0, 0);
+        }
+        if(colourScheme == 3) {
+            colour1 = new Color(150, 131, 21);
+            colour2 = Color.WHITE;
+        }
+    }
+
     //starts an AI vs AI game
-    public void setupAiGame() {
-        startGame(GameType.AI_VS_AI);
+    public void setupAiGame(int colourScheme) {
+        startGame(GameType.AI_VS_AI, colourScheme);
         aiTimer = new Timer(800, this);
     }
 
@@ -93,23 +114,27 @@ public class Board implements ActionListener {
 
     //save the coordinates of the tile which has been clicked
     public void addSource(int x, int y) {
-        availableTiles = new ArrayList<>();
-        sourceX = convertToGridCoords(x);
-        sourceY = convertToGridCoords(y);
-        highlightTile(sourceX, sourceY);
+        if(gameType != GameType.AI_VS_AI) {
+            availableTiles = new ArrayList<>();
+            sourceX = convertToGridCoords(x);
+            sourceY = convertToGridCoords(y);
+            highlightTile(sourceX, sourceY);
 
-        if(validatePlayer(sourceY, sourceX)) {
-            availableTiles.addAll(moveController.getPossibleJumps(sourceY, sourceX));
-            if(availableTiles.isEmpty())
-                availableTiles = moveController.getPossibleMoves(sourceY, sourceX);
+            if (validatePlayer(sourceY, sourceX)) {
+                availableTiles.addAll(moveController.getPossibleJumps(sourceY, sourceX));
+                if (availableTiles.isEmpty())
+                    availableTiles = moveController.getPossibleMoves(sourceY, sourceX);
+            }
         }
     }
 
     //save the coordinates of the destination tile
     public void addDestination(int x, int y) {
-        destX = convertToGridCoords(y);
-        destY = convertToGridCoords(x);
-        validateMove(sourceY, sourceX, destX, destY);
+        if(gameType != GameType.AI_VS_AI) {
+            destX = convertToGridCoords(y);
+            destY = convertToGridCoords(x);
+            validateMove(sourceY, sourceX, destX, destY);
+        }
     }
 
     //checks if a move from row, col to destRow, destCol is valid
@@ -184,9 +209,10 @@ public class Board implements ActionListener {
             for (int j = 0; j < SIZE; j++) {
                 if ((i % 2 == 1 && j % 2 == 1) || (j % 2 == 0 && i % 2 == 0)) { //some modulo magic to do alternating colours for the board tiles
                     //set appropriate colours
-                    g2d.setColor(new Color(153, 0, 0));
+                    //g2d.setColor(new Color(153, 0, 0));
+                    g2d.setColor(colour2);
                 } else {
-                    g2d.setColor(Color.black);
+                    g2d.setColor(colour1);
                 }
 
                 //actually draw the tile
@@ -210,6 +236,11 @@ public class Board implements ActionListener {
             g2d.drawRect(highlightedTile.getRow() * TILE_WIDTH, highlightedTile.getCol() * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
         }
 
+        if(!GameHistory.getMoves().isEmpty() && showLastMove) {
+            Move lastMove = GameHistory.getMoves().getLast();
+            DrawHelper.showLastMove(g2d, lastMove);
+        }
+
         if(availableTiles != null) {
             g2d.setColor(new Color(153, 255, 51));
             for(GridPosition gp : availableTiles) {
@@ -231,11 +262,18 @@ public class Board implements ActionListener {
 
             g2d.drawString(text, text_x, text_y + ((fm.getDescent() + fm.getAscent()) / 2));
         }
+
+
     }
 
     //this is only used when playing vs AI and it's the AI's turn
+    private int counter = 0; //this counter delays the AI's moves, should result in the AI waiting for between 0 and 2 seconds
     public void update() {
-        if(gameType == GameType.VS_AI && TurnManager.getCurrentPlayer() == 2) {
+        counter++;
+        if(counter > 60)
+            counter = 0;
+
+        if(gameType == GameType.VS_AI && TurnManager.getCurrentPlayer() == 2 && counter == 60) {
             GridPosition[] gps = ai.getMove(Type.WHITE);
             if(gps != null)
                 validateMove(gps[0].getRow(), gps[0].getCol(), gps[1].getRow(), gps[1].getCol());
@@ -425,4 +463,9 @@ public class Board implements ActionListener {
             }
         }
     }
+
+    public void setShowLastMove() {
+        this.showLastMove = !showLastMove;
+    }
+
 }

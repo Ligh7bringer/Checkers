@@ -2,6 +2,8 @@ package Controller;
 import Model.Board;
 import Model.GameType;
 import Model.Move;
+import Model.Type;
+
 import java.util.LinkedList;
 
 //simple static class used to access some Board methods from the UI classes
@@ -9,6 +11,8 @@ public class BoardController {
     private static Board board;
     private static GameType gameType;
     private static LinkedList<Move> replay;
+    private static int colourScheme;
+    private static Type playerColour;
 
     //constructor
     public BoardController(Board b) {
@@ -19,10 +23,10 @@ public class BoardController {
     public static void setupGame(GameType t) {
         gameType = t;
         if(t == GameType.AI_VS_AI) {
-            board.setupAiGame();
+            board.setupAiGame(colourScheme);
             board.startAiTimer();
         } else
-            board.startGame(t);
+            board.startGame(t, colourScheme);
     }
 
     //sets up everything needed for a replay to be started
@@ -32,6 +36,14 @@ public class BoardController {
             board.replayGame();
             Board.startTimer();
         }
+    }
+
+    public static void setShowLastMove() {
+        board.setShowLastMove();
+    }
+
+    public static void setColours(int type) {
+        colourScheme = type;
     }
 
     //getters
