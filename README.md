@@ -5,3 +5,4 @@ TO DO:
 
 - add report
 - add executable
+- remove ignored files
