@@ -1,6 +1,7 @@
 package UI;
 
 import Controller.BoardController;
+import Controller.TurnManager;
 import Model.Board;
 import Model.GameType;
 
@@ -63,19 +64,19 @@ public class GamePanel extends JPanel implements MouseListener {
     //event listener. Mouse pressed seems to be more accurate than mouseClicked for some reason
     public void mousePressed(MouseEvent e) {
         setMousePosition(e);
-        clicks++;
+        if((BoardController.getGameType() == GameType.VS_AI && TurnManager.getCurrentPlayer() == 1) || BoardController.getGameType() == GameType.TWO_PLAYERS) {
+            clicks++;
 
-        if (clicks > 2)
-            clicks = 0;
-
-        if (clicks == 1 ) {
-            board.addSource(mouseX, mouseY);
+            if (clicks > 2)
+                clicks = 0;
+            if (clicks == 1) {
+                board.addSource(mouseX, mouseY);
+            }
+            if (clicks == 2) {
+                board.addDestination(mouseX, mouseY);
+                clicks = 0;
+            }
         }
-        if (clicks == 2) {
-            board.addDestination(mouseX, mouseY);
-            clicks = 0;
-        }
-
     }
 
     //the rest of the mouse events that need to be implemented

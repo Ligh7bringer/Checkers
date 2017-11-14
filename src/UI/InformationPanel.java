@@ -5,6 +5,7 @@ import Controller.GameHistory;
 import Controller.MoveController;
 import Controller.TurnManager;
 import Model.Board;
+import Model.GameType;
 import Model.Move;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -72,9 +73,11 @@ public class InformationPanel extends JPanel implements ActionListener {
         scroll.setPreferredSize(new Dimension(170, 200));
 
         undoBtn = new JButton("Undo");
+        undoBtn.setToolTipText("Undo the last move.");
         undoBtn.addActionListener(this);
 
         redoBtn = new JButton("Redo");
+        redoBtn.setToolTipText("Redo the last undone move.");
         redoBtn.addActionListener(this);
 
         setLayout(new GridBagLayout());
@@ -128,7 +131,11 @@ public class InformationPanel extends JPanel implements ActionListener {
     //update method which updates the text of the JLabels and the move history text pane
     public void update() {
         currentPlayer.setText("<html>It's player <font color='gray'>" + TurnManager.getCurrentPlayer() + "'s </font> turn!</html>");
-        gameType.setText("Game type: " + BoardController.getGameType());
+
+        if(BoardController.getGameType() == null)
+            gameType.setText("Hello!");
+        else
+            gameType.setText("Game type: " + BoardController.getGameType());
 
         updateCount();
 
@@ -185,11 +192,11 @@ public class InformationPanel extends JPanel implements ActionListener {
     //action listener for button presses
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(e.getSource() == undoBtn) {
+        if(e.getSource() == undoBtn && BoardController.getGameType() != GameType.AI_VS_AI) {
             if(MoveController.undoLastMove())
                 removeLastLine();
         }
-        if(e.getSource() == redoBtn) {
+        if(e.getSource() == redoBtn && BoardController.getGameType() != GameType.AI_VS_AI) {
             MoveController.redoLastMove();
         }
     }

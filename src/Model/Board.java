@@ -114,17 +114,15 @@ public class Board implements ActionListener {
 
     //save the coordinates of the tile which has been clicked
     public void addSource(int x, int y) {
-        if(gameType != GameType.AI_VS_AI) {
-            availableTiles = new ArrayList<>();
-            sourceX = convertToGridCoords(x);
-            sourceY = convertToGridCoords(y);
-            highlightTile(sourceX, sourceY);
+        availableTiles = new ArrayList<>();
+        sourceX = convertToGridCoords(x);
+        sourceY = convertToGridCoords(y);
+        highlightTile(sourceX, sourceY);
 
-            if (validatePlayer(sourceY, sourceX)) {
-                availableTiles.addAll(moveController.getPossibleJumps(sourceY, sourceX));
-                if (availableTiles.isEmpty())
-                    availableTiles = moveController.getPossibleMoves(sourceY, sourceX);
-            }
+        if (validatePlayer(sourceY, sourceX)) {
+            availableTiles.addAll(moveController.getPossibleJumps(sourceY, sourceX));
+            if (availableTiles.isEmpty())
+                availableTiles = moveController.getPossibleMoves(sourceY, sourceX);
         }
     }
 
@@ -183,18 +181,27 @@ public class Board implements ActionListener {
             availableTiles.clear();
         highlightedTile = null;
 
-        if(isWinner() != 0) {
-            System.out.println("game over! player" + isWinner() + "won!");
-            InformationPanel.setErrorText("Player " + isWinner() + " (" + TurnManager.getNextColour() + ") won!");
-            gameOver = true;
-            if(gameType != GameType.REPLAY) {
-                String s = JOptionPane.showInputDialog("Save replay?");
-                if ((s != null) && (s.length() > 0)) {
-                    ReplayHandler.saveReplay(s);
-                }
+        //the AI can be used to check if the current player has no available moves, which means they have lost
+        GridPosition[] test = ai.getMove(TurnManager.getCurrentColour());
+        if(test == null && (gameType == GameType.TWO_PLAYERS || gameType == GameType.VS_AI))
+            displayGameOver();
+
+        //check if someone has won afer the last move
+        if(isWinner() != 0 )
+            displayGameOver();
+    }
+
+    //tell the players the game has ended
+    private void displayGameOver() {
+        System.out.println("game over! player" + isWinner() + "won!");
+        InformationPanel.setErrorText("Player " + isWinner() + " (" + TurnManager.getNextColour() + ") won!");
+        gameOver = true;
+        if(gameType != GameType.REPLAY) {
+            String s = JOptionPane.showInputDialog("Save replay?");
+            if ((s != null) && (s.length() > 0)) {
+                ReplayHandler.saveReplay(s);
             }
         }
-
     }
 
     //paints the board and checkers
