@@ -86,7 +86,6 @@ public class MoveController {
         for(int i = 0; i < Board.SIZE; i++) {
             for (int j = 0; j < Board.SIZE; j++) {
                 Piece p = board.getPiece(i, j);
-                //System.out.println(Board.getCurrentKing());
                 if(board.getPieces()[i][j] != null && (p.getType() == t || p.getType() == TurnManager.getCurrentKing())) {
                     if(!getPossibleJumps(i, j).isEmpty()) {
                         //System.out.println("This one can jump: " + i + ", " + j);
@@ -116,7 +115,6 @@ public class MoveController {
             if(removedPiece != null) {
                 GridPosition r = removedPiece.getGridPosition();
                 board.addPiece(r, removedPiece.getType()); //add the removed piece
-                //TurnManager.nextTurn();
             }
 
             TurnManager.nextTurn(); //switch player
@@ -131,7 +129,6 @@ public class MoveController {
     public static void redoLastMove() {
         Move move = GameHistory.getRedoMove();
         if(move != null) {
-
             Piece source = move.getSource(); //get source
             Piece dest = move.getDestination(); //get destination
 
@@ -145,7 +142,7 @@ public class MoveController {
         }
     }
 
-    //returns the opposite type of Type t
+    //returns the opposite type(s) of Type t
     private static ArrayList<Type> getOppositeType(Type t) {
         ArrayList<Type> opposite = new ArrayList<>();
         if(t == Type.WHITE) {

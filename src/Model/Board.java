@@ -44,6 +44,7 @@ public class Board implements ActionListener {
     private boolean showLastMove = true;
 
     //constructor for board
+    //initialises all variables and objects which are going to be used
     public Board(){
         pieces = new Piece[SIZE][SIZE]; //create the array
         moveController = new MoveController(this);
@@ -72,6 +73,7 @@ public class Board implements ActionListener {
         initialiseBoard();
     }
 
+    //sets the colour scheme
     private void setColours(int colourScheme) {
         if(colourScheme == 1) {
             colour1 = Color.BLACK;
@@ -98,7 +100,7 @@ public class Board implements ActionListener {
         aiTimer.start();
     }
 
-    //this creates the starting layout of the board
+    //creates the starting layout of the board
     private void initialiseBoard() {
         for(int row=0; row < (SIZE); row+=2){
             pieces[5][row] = new Piece(Type.BLACK, new GridPosition(5, row));
@@ -119,6 +121,7 @@ public class Board implements ActionListener {
         sourceY = convertToGridCoords(y);
         highlightTile(sourceX, sourceY);
 
+        //highlight the possible moves
         if (validatePlayer(sourceY, sourceX)) {
             availableTiles.addAll(moveController.getPossibleJumps(sourceY, sourceX));
             if (availableTiles.isEmpty())
@@ -176,7 +179,7 @@ public class Board implements ActionListener {
             System.out.println("Invalid piece!");
         }
 
-
+        //stop highlighting tiles
         if(!availableTiles.isEmpty())
             availableTiles.clear();
         highlightedTile = null;
@@ -186,7 +189,7 @@ public class Board implements ActionListener {
         if(test == null && (gameType == GameType.TWO_PLAYERS || gameType == GameType.VS_AI))
             displayGameOver();
 
-        //check if someone has won afer the last move
+        //check if someone has won after the last move
         if(isWinner() != 0 )
             displayGameOver();
     }
@@ -379,10 +382,9 @@ public class Board implements ActionListener {
     //return false if tile is unoccupied
     public boolean isTileOccupied(int row, int col) {
         return !isLegalPos(row, col) || pieces[row][col] != null;
-
     }
 
-    //returns piece at grid coordinates gridX and gridY
+    //returns piece at grid coordinates row and col
     public Piece getPiece(int row, int col) {
         if(!isLegalPos(row, col))
             return new Piece(Type.EMPTY, new GridPosition(-1, -1));
@@ -406,7 +408,8 @@ public class Board implements ActionListener {
     //checks if a player has lost all their checkers
     //returns 2 if player 1 has 0 checkers
     //returns 1 if player 2 has 0 checkers
-    //basically it returns the winner
+    //returns 0 if no player has won
+    //basically returns the winner
     private int isWinner() {
         if(getPieceCount()[0] == 0)
             return 2;
@@ -471,6 +474,7 @@ public class Board implements ActionListener {
         }
     }
 
+    //setter for the showLastMove boolean
     public void setShowLastMove() {
         this.showLastMove = !showLastMove;
     }

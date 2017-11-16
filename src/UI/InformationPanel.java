@@ -130,7 +130,10 @@ public class InformationPanel extends JPanel implements ActionListener {
 
     //update method which updates the text of the JLabels and the move history text pane
     public void update() {
-        currentPlayer.setText("<html>It's player <font color='gray'>" + TurnManager.getCurrentPlayer() + "'s </font> turn!</html>");
+        if(BoardController.getGameType() != null)
+            currentPlayer.setText("<html>Player <font color='gray'>" + TurnManager.getCurrentPlayer() + "</font>, make your move!</html>");
+        else
+            currentPlayer.setText(" ");
 
         if(BoardController.getGameType() == null)
             gameType.setText("Hello!");

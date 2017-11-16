@@ -117,7 +117,7 @@ public class ReplayHandler {
         return replay;
     }
 
-    //return the names of all files in the replay/ directory
+    //returns the names of all files in the replay/ directory
     public static ArrayList<String> getAllReplayNames() {
         ArrayList<String> names = new ArrayList<>();
         File folder = new File("replays/");
@@ -145,7 +145,7 @@ public class ReplayHandler {
         if(s.equals("BLACK_KING"))
             return Type.BLACK_KING;
 
-        return null;
+        return Type.EMPTY;
     }
 
 }

@@ -37,7 +37,6 @@ public class AI {
                         if (!moveController.getPossibleMoves(i, j).isEmpty()) {
                             canMove.add(new GridPosition(i, j));
                         }
-
                     }
                 }
             }
