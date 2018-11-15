@@ -33,7 +33,7 @@ public class InformationPanel extends JPanel implements ActionListener {
     //the constructor initialises the panel
     public InformationPanel() {
         Font oldLabelFont = UIManager.getFont("Label.font");
-        UIManager.put("Label.font", oldLabelFont.deriveFont(Font.PLAIN, 15));
+        UIManager.put("Label.font", oldLabelFont.deriveFont(Font.PLAIN, 13));
 
         Dimension size = getPreferredSize();
         size.width = WIDTH;
